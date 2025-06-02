@@ -7,9 +7,18 @@ class Numero:
         self.formas_normalizadas = np.array([], dtype=object)
         self.cifras_significativas = np.array([], dtype=int)
         self.operaciones_posibles = np.array([], dtype=object)
+        
+        self.es_valido = True  # Nuevo atributo requerido
+        self.mensaje_error = ""  # Nuevo atributo requerido
+        self._validar_sistemas_numericos()  # Nueva validación requerida
 
         self._procesar_valor()
-        
+    def _validar_sistemas_numericos(self):
+        """Valida si el valor pertenece a algún sistema numérico válido"""
+        if len(self.bases) == 0:
+            self.es_valido = False
+            self.mensaje_error = f"Inválido: '{self.valor_original}' no es binario, decimal ni hexadecimal"    
+    
     
     def _procesar_valor(self):
         """Procesa el valor y determina propiedades mediante computación real"""
@@ -218,7 +227,26 @@ class Numero:
             )
         
         return salida
-num = Numero("z%")
+def resultado_completo(self) -> str:
+        if not self.es_valido:
+            return f"{self.valor_original} | {self.mensaje_error}"
+        
+        salida = f"{self.valor_original}"
+        
+        if len(self.bases) == 0:
+            return salida + " | Inválido"
+        
+        for i in range(len(self.bases)):
+            salida += (
+                f"|Base:{self.bases[i]}"
+                f"|Forma:{self.formas_normalizadas[i]}"
+                f"|Cifras:{self.cifras_significativas[i]}"
+                f"|Operaciones:{self.operaciones_posibles[i]}"
+            )
+        
+        return salida
+
+num = Numero("789.123")
 print(num.resultado_completo())
     
     
