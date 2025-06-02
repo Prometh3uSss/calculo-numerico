@@ -1,5 +1,6 @@
 import numpy as np
 
+#inicio del proyecto.
 class Numero:
     def __init__(self, valor: str):
         self.valor_original = valor
