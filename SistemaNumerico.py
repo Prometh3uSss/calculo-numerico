@@ -218,7 +218,8 @@ class Numero:
             )
         
         return salida
-num = Numero("z%")
+    
+num = Numero("0")
 print(num.resultado_completo())
     
     

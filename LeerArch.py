@@ -125,7 +125,7 @@ class ArregloBidimensional:
         if fila in self.filas and columna in self.filas[fila]:
             return self.filas[fila][columna]
         return None
-"""
+
 # Crear handler (procesa el archivo automáticamente)
 handler = FileHandler("mis_datos.bin")
 
@@ -139,4 +139,4 @@ for i in range(filas):
         valor = datos.obtener_elemento(i, j)
         if valor:
             # Procesar cada valor individual aquí
-            print(f"Procesando valor en ({i},{j}): {valor}")"""   
+            print(f"Procesando valor en ({i},{j}): {valor}")
