@@ -28,3 +28,7 @@ class Pila:
     def esta_vacia(self):
         return len(self.datos) == 0
     
+    def cima(self):
+        if self.esta_vacia():
+            return None
+        return self.datos.obtener(len(self.datos) - 1)
