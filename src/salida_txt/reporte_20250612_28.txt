@@ -1,6 +1,0 @@
-z%: uno | No reconocido
-z%: dos | No reconocido
-z%: tres | No reconocido
-z%: cuatro | No reconocido
-z%: cinco | No reconocido
-z%: seis | No reconocido

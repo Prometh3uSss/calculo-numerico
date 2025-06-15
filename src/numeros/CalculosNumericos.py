@@ -43,33 +43,53 @@ class Numero:
             formas.append(forma)
             cifras.append(cifra)
             
-            if base == 10:
-                ops = self._demostrar_operaciones_decimal(valor)
-                operaciones.append(ops)
-            else:
-                operaciones.append("") 
+            ops_demostrables_simbolos = self._demostrar_operaciones_por_computo(valor, base)
+            operaciones.append(ops_demostrables_simbolos)
         
         self.formas_normalizadas = np.array(formas, dtype=object)
         self.cifras_significativas = np.array(cifras, dtype=int)
         self.operaciones_posibles = np.array(operaciones, dtype=object)
     
     def _es_binario(self, valor: str) -> bool:
-        return all(c in '01.' for c in valor)
+        tiene_punto = False
+        for char in valor:
+            if char == '.':
+                if tiene_punto: return False 
+                tiene_punto = True
+            elif char not in '01':
+                return False
+        return True
     
     def _es_decimal(self, valor: str) -> bool:
-        partes = valor.split('.')
-        if len(partes) > 2:
-            return False
-        return all(part.isdigit() for part in partes)
+        tiene_punto = False
+        for char in valor:
+            if char == '.':
+                if tiene_punto: return False 
+                tiene_punto = True
+            elif char not in '0123456789':
+                return False
+        return True
     
     def _es_hexadecimal(self, valor: str) -> bool:
-        return all(c in '0123456789abcdef.' for c in valor)
+        tiene_punto = False
+        for char in valor:
+            if char == '.':
+                if tiene_punto: return False 
+                tiene_punto = True
+            elif char not in '0123456789abcdef':
+                return False
+        return True
     
     def _calcular_forma_normalizada(self, valor: str, base: int) -> str:
-        if '.' in valor:
-            partes = valor.split('.')
-            entera = partes[0]
-            decimal = partes[1]
+        punto_indice = -1
+        for i in range(len(valor)):
+            if valor[i] == '.':
+                punto_indice = i
+                break
+        
+        if punto_indice != -1:
+            entera = valor[0:punto_indice]
+            decimal = valor[punto_indice+1:]
         else:
             entera = valor
             decimal = ""
@@ -85,167 +105,314 @@ class Numero:
         
         if inicio < len(entera):
             mantisa = entera[inicio]
-            if inicio + 1 < len(entera) or decimal:
-                mantisa += '.' + entera[inicio+1:] + decimal
+            for i in range(inicio + 1, len(entera)):
+                mantisa += entera[i]
+            if decimal:
+                mantisa += '.'
+                for char in decimal:
+                    mantisa += char
         elif decimal:
             inicio_dec = 0
             while inicio_dec < len(decimal) and decimal[inicio_dec] == '0':
                 inicio_dec += 1
             if inicio_dec < len(decimal):
-                mantisa = decimal[inicio_dec] + '.' + decimal[inicio_dec+1:]
+                mantisa = decimal[inicio_dec]
+                for i in range(inicio_dec + 1, len(decimal)):
+                    mantisa += decimal[i]
                 exponente = -inicio_dec - 1
             else:
                 return "0"
         else:
             return "0"
         
-        return f"{mantisa} × {base}^{exponente}"
+        return f"{mantisa} x {base}^{exponente}"
     
     def _contar_cifras_significativas(self, valor: str, base: int) -> int:
-        if valor.startswith('-'):
-            valor = valor[1:]
-
-        if '.' in valor:
-            valor_sin_punto = valor.replace('.', '')
-            
-            inicio_significativo = 0
-            while inicio_significativo < len(valor_sin_punto) and valor_sin_punto[inicio_significativo] == '0':
-                inicio_significativo += 1
-            
-            if inicio_significativo == len(valor_sin_punto):
-                return 1
-
-            if '.' in self.valor_original:
-                return len(valor_sin_punto) - inicio_significativo
-            else:
-                return len(valor.lstrip('0'))
+        es_negativo = False
+        if len(valor) > 0 and valor[0] == '-':
+            es_negativo = True
+            valor_procesado = ""
+            for i in range(1, len(valor)):
+                valor_procesado += valor[i]
         else:
-            valor_sin_ceros_izquierda = valor.lstrip('0')
+            valor_procesado = valor
+
+        valor_sin_punto = ""
+        tiene_punto = False
+        for char in valor_procesado:
+            if char == '.':
+                tiene_punto = True
+            else:
+                valor_sin_punto += char
+            
+        inicio_significativo = 0
+        while inicio_significativo < len(valor_sin_punto) and valor_sin_punto[inicio_significativo] == '0':
+            inicio_significativo += 1
+        
+        if inicio_significativo == len(valor_sin_punto):
+            return 1 
+
+        if tiene_punto: 
+            return len(valor_sin_punto) - inicio_significativo
+        else: 
+            valor_sin_ceros_izquierda = ""
+            encontro_digito_no_cero = False
+            for char in valor_procesado:
+                if char != '0':
+                    encontro_digito_no_cero = True
+                if encontro_digito_no_cero:
+                    valor_sin_ceros_izquierda += char
             
             if not valor_sin_ceros_izquierda:
-                return 1
-
+                return 1 
+            
             return len(valor_sin_ceros_izquierda)
 
-    def _demostrar_operaciones_decimal(self, valor: str) -> str:
-        operaciones = []
-        
-        try:
-            num_original = float(valor) if '.' in valor else int(valor)
-        except ValueError:
-            return ""
+    def _char_a_int(self, char_digit: str) -> int:
+        """Convierte un caracter digito (0-9, a-f) a su valor entero."""
+        if '0' <= char_digit <= '9':
+            return ord(char_digit) - ord('0')
+        elif 'a' <= char_digit <= 'f':
+            return ord(char_digit) - ord('a') + 10
+        return 0 
 
-        # Generar un operando aleatorio entre 2 y 9
-        operando_aleatorio = random.randint(2, 9) 
+    def _int_a_char(self, int_val: int) -> str:
+        """Convierte un valor entero (0-15) a su caracter digito (0-9, A-F)."""
+        if 0 <= int_val <= 9:
+            return chr(ord('0') + int_val)
+        elif 10 <= int_val <= 15:
+            return chr(ord('a') + int_val - 10)
+        return '0' 
+
+    def _pad_strings_izquierda(self, s1: str, s2: str, pad_char='0') -> tuple[str, str]:
+        """Rellena con un caracter a la izquierda para igualar longitudes."""
+        max_len = len(s1) if len(s1) > len(s2) else len(s2)
+        padded_s1 = pad_char * (max_len - len(s1)) + s1
+        padded_s2 = pad_char * (max_len - len(s2)) + s2
+        return padded_s1, padded_s2
+
+    def _eliminar_ceros_izquierda(self, num_str: str) -> str:
+        """Elimina ceros a la izquierda de una cadena numerica."""
+        if len(num_str) == 0:
+            return '0'
+        idx = 0
+        while idx < len(num_str) - 1 and num_str[idx] == '0':
+            idx += 1
+        return num_str[idx:]
+
+    def _sumar_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
+        """Suma dos numeros representados como cadenas en una base dada."""
+        num1_padded, num2_padded = self._pad_strings_izquierda(num1_str, num2_str)
+        
+        result = []
+        carry = 0
+        
+        for i in range(len(num1_padded) - 1, -1, -1):
+            digit1_val = self._char_a_int(num1_padded[i])
+            digit2_val = self._char_a_int(num2_padded[i])
             
-        # Asegurarse de que operando_aleatorio no sea 0 si se va a usar para división
-        if operando_aleatorio == 0: # Aunque random.randint(2,9) nunca dará 0, es buena práctica defensiva.
-            operando_aleatorio = 1 
+            current_sum = digit1_val + digit2_val + carry
+            digit_result = current_sum % base
+            carry = current_sum // base 
+            
+            result.append(self._int_a_char(digit_result))
+            
+        if carry > 0:
+            result.append(self._int_a_char(carry))
+            
+        final_result = "".join(reversed(result))
+        return self._eliminar_ceros_izquierda(final_result)
 
-        # Las operaciones manuales usan el operando aleatorio
-        try:
-            resultado_suma = self._suma_manual(num_original, operando_aleatorio)
-            operaciones.append(f"{num_original} + {operando_aleatorio} = {resultado_suma:.4f}")
-        except Exception:
-            pass
+    def _es_mayor_o_igual(self, num1_str: str, num2_str: str, base: int) -> bool:
+        """Compara si num1_str es mayor o igual que num2_str en una base dada."""
+        num1_cleaned = self._eliminar_ceros_izquierda(num1_str)
+        num2_cleaned = self._eliminar_ceros_izquierda(num2_str)
+
+        len1 = len(num1_cleaned)
+        len2 = len(num2_cleaned)
+
+        if len1 > len2:
+            return True
+        if len1 < len2:
+            return False
+
+        for i in range(len1):
+            digit1 = self._char_a_int(num1_cleaned[i])
+            digit2 = self._char_a_int(num2_cleaned[i])
+            if digit1 > digit2:
+                return True
+            if digit1 < digit2:
+                return False
         
-        try:
-            resultado_resta = self._resta_manual(num_original, operando_aleatorio)
-            operaciones.append(f"{num_original} - {operando_aleatorio} = {resultado_resta:.4f}")
-        except Exception:
-            pass
+        return True 
+
+    def _restar_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
+        """Resta dos numeros representados como cadenas en una base dada (num1 - num2).
+           Asume num1 >= num2. No maneja negativos.
+        """
+        if not self._es_mayor_o_igual(num1_str, num2_str, base):
+            return "ERROR: Resultado negativo (no soportado)"
         
-        try:
-            resultado_multiplicacion = self._multiplicacion_manual(num_original, operando_aleatorio)
-            operaciones.append(f"{num_original} * {operando_aleatorio} = {resultado_multiplicacion:.4f}")
-        except Exception:
-            pass
+        num1_padded, num2_padded = self._pad_strings_izquierda(num1_str, num2_str)
         
-        try:
-            if operando_aleatorio != 0:
-                resultado_division = self._division_manual(num_original, operando_aleatorio)
-                operaciones.append(f"{num_original} / {operando_aleatorio} = {resultado_division:.4f}")
+        result = []
+        borrow = 0
+        
+        for i in range(len(num1_padded) - 1, -1, -1):
+            digit1_val = self._char_a_int(num1_padded[i])
+            digit2_val = self._char_a_int(num2_padded[i])
+            
+            current_diff = digit1_val - digit2_val - borrow
+            
+            if current_diff < 0:
+                current_diff += base
+                borrow = 1
             else:
-                operaciones.append(f"{num_original} / {operando_aleatorio} = División por cero")
-        except ZeroDivisionError:
-            operaciones.append(f"{num_original} / {operando_aleatorio} = División por cero")
+                borrow = 0
+            
+            result.append(self._int_a_char(current_diff))
+            
+        final_result = "".join(reversed(result))
+        return self._eliminar_ceros_izquierda(final_result)
+
+    def _multiplicar_un_digito(self, num_str: str, digit_char: str, base: int) -> str:
+        """Multiplica una cadena numerica por un solo digito en la misma base."""
+        if digit_char == '0':
+            return '0'
+        
+        digit_val = self._char_a_int(digit_char)
+        
+        result = []
+        carry = 0
+        
+        for i in range(len(num_str) - 1, -1, -1):
+            num_digit_val = self._char_a_int(num_str[i])
+            product = num_digit_val * digit_val + carry 
+            
+            result_digit = product % base
+            carry = product // base
+            
+            result.append(self._int_a_char(result_digit))
+            
+        if carry > 0:
+            result.append(self._int_a_char(carry))
+            
+        return "".join(reversed(result))
+
+    def _multiplicar_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
+        """Multiplica dos numeros representados como cadenas en una base dada."""
+        if num1_str == '0' or num2_str == '0':
+            return '0'
+        
+        num1_str = self._eliminar_ceros_izquierda(num1_str)
+        num2_str = self._eliminar_ceros_izquierda(num2_str)
+
+        partial_products = []
+        
+        for i in range(len(num2_str) - 1, -1, -1):
+            digit2_char = num2_str[i]
+            product_line = self._multiplicar_un_digito(num1_str, digit2_char, base)
+            
+            for _ in range(len(num2_str) - 1 - i):
+                product_line += '0'
+            
+            partial_products.append(product_line)
+        
+        final_sum = '0'
+        for p_prod in partial_products:
+            final_sum = self._sumar_cadenas_manual(final_sum, p_prod, base)
+            
+        return self._eliminar_ceros_izquierda(final_sum)
+
+    def _dividir_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
+        """Divide dos numeros representados como cadenas en una base dada (num1 / num2).
+           Devuelve solo la parte entera del cociente.
+           Requiere implementacion de resta y comparacion de cadenas.
+        """
+        if num2_str == '0':
+            raise ZeroDivisionError("Division por cero no es posible.")
+
+        num1_str = self._eliminar_ceros_izquierda(num1_str)
+        num2_str = self._eliminar_ceros_izquierda(num2_str)
+        
+        if num1_str == '0':
+            return '0'
+        
+        if not self._es_mayor_o_igual(num1_str, num2_str, base):
+            return '0'
+
+        cociente = "0"
+        dividendo_actual = "" 
+        
+        for digit_char in num1_str:
+            dividendo_actual += digit_char
+            dividendo_actual = self._eliminar_ceros_izquierda(dividendo_actual) 
+            
+            current_q_digit = 0
+            while self._es_mayor_o_igual(dividendo_actual, num2_str, base):
+                dividendo_actual = self._restar_cadenas_manual(dividendo_actual, num2_str, base)
+                temp_inc = self._sumar_cadenas_manual(self._int_a_char(current_q_digit), '1', base)
+                current_q_digit = self._char_a_int(temp_inc) 
+                if len(temp_inc) > 1: 
+                    pass 
+
+            cociente += self._int_a_char(current_q_digit)
+            
+        return self._eliminar_ceros_izquierda(cociente)
+
+    def _demostrar_operaciones_por_computo(self, valor_str: str, base: int) -> str:
+        operaciones_posibles = []
+        
+        operando_dec_int = random.randint(1, 9)
+
+        operando_str = ""
+        temp_val = operando_dec_int
+        if base == 10:
+            operando_str = str(operando_dec_int) 
+        else: 
+            if temp_val == 0:
+                operando_str = '0'
+            else:
+                while temp_val > 0:
+                    remainder = temp_val % base
+                    operando_str = self._int_a_char(remainder) + operando_str
+                    temp_val = temp_val // base 
+        
+        if '.' in valor_str:
+            return "" 
+        
+        try:
+            self._sumar_cadenas_manual(valor_str, operando_str, base)
+            operaciones_posibles.append('+')
+        except Exception:
+            pass
+
+        try:
+            if self._es_mayor_o_igual(valor_str, operando_str, base):
+                self._restar_cadenas_manual(valor_str, operando_str, base)
+                operaciones_posibles.append('-')
         except Exception:
             pass
         
-        return " | ".join(operaciones)
-    
-    def _suma_manual(self, a, b):
-        """Suma computacional mediante incrementos sucesivos para enteros, o suma directa para flotantes."""
-        if isinstance(a, float) or isinstance(b, float):
-            return a + b # Si hay flotantes, usar suma nativa para precisión.
+        try:
+            self._multiplicar_cadenas_manual(valor_str, operando_str, base)
+            operaciones_posibles.append('*')
+        except Exception:
+            pass
         
-        result = a
-        if b > 0:
-            for _ in range(b):
-                result += 1
-        else:
-            for _ in range(abs(b)):
-                result -= 1
-        return result
-    
-    def _resta_manual(self, a, b):
-        """Resta computacional mediante decrementos sucesivos para enteros, o resta directa para flotantes."""
-        if isinstance(a, float) or isinstance(b, float):
-            return a - b # Si hay flotantes, usar resta nativa para precisión.
+        try:
+            if operando_str != '0': 
+                self._dividir_cadenas_manual(valor_str, operando_str, base)
+                operaciones_posibles.append('/')
+            else:
+                pass 
+        except ZeroDivisionError:
+            pass
+        except Exception:
+            pass
         
-        result = a
-        if b > 0:
-            for _ in range(b):
-                result -= 1
-        else:
-            for _ in range(abs(b)):
-                result += 1
-        return result
-    
-    def _multiplicacion_manual(self, a, b):
-        """Multiplicación computacional mediante sumas sucesivas para enteros, o multiplicación directa para flotantes."""
-        if isinstance(a, float) or isinstance(b, float):
-            return a * b # Si hay flotantes, usar multiplicación nativa.
+        return "".join(operaciones_posibles)
 
-        result = 0
-        sign = 1
-        if a < 0:
-            sign *= -1
-            a = abs(a)
-        if b < 0:
-            sign *= -1
-            b = abs(b)
-
-        for _ in range(b): # Este bucle solo es viable para 'b' entero y pequeño
-            result = self._suma_manual(result, a) # Recursión con _suma_manual, que ahora es eficiente
-        
-        return result * sign
-    
-    def _division_manual(self, a, b):
-        """División computacional mediante restas sucesivas para enteros, o división directa para flotantes."""
-        if b == 0:
-            raise ZeroDivisionError("División por cero no es posible.")
-        
-        if isinstance(a, float) or isinstance(b, float):
-            return a / b # Si hay flotantes, usar división nativa.
-
-        sign = 1
-        if a < 0:
-            sign *= -1
-            a = abs(a)
-        if b < 0:
-            sign *= -1
-            b = abs(b)
-        
-        contador = 0
-        temp_a = a
-        # Este bucle solo es viable si a/b es un entero pequeño
-        while temp_a >= b: 
-            temp_a = self._resta_manual(temp_a, b) # Recursión con _resta_manual, que ahora es eficiente
-            contador += 1
-        
-        return contador * sign
-    
     def resultado_completo(self) -> str:
         if not self.es_valido:
             return f"{self.valor_original} | {self.mensaje_error}"
@@ -261,5 +428,8 @@ class Numero:
             )
         
         return salida
-num = Numero("0.0050")
+
+num = Numero("10")
+print(num.resultado_completo())
+num = Numero("1010")
 print(num.resultado_completo())
