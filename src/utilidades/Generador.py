@@ -2,51 +2,50 @@ import os
 from datetime import datetime
 import random
 
-class GeneradorArchivos:
+class generadorArchivos:
     """
-    Clase encargada de generar archivos de texto con los resultados del análisis numérico.
+    Clase encargada de generar archivos de texto con los resultados del analisis numerico
     """
-    def __init__(self, ruta_salida: str):
+    def __init__(self, rutaSalida: str):
         """
-        Inicializa el generador con la ruta donde se guardarán los archivos.
+        Inicializa el generador con la ruta donde se guardarán los archivos
 
         Args:
-            ruta_salida (str): La ruta del directorio donde se crearán los archivos .txt.
+            ruta_salida (str): La ruta del directorio donde se crearan los archivos .txt.
         """
-        if not ruta_salida or not os.path.isdir(ruta_salida):
-            raise ValueError(f"Error: La ruta de salida '{ruta_salida}' no es válida o no existe.")
-        self.ruta_salida = ruta_salida
+        if not rutaSalida or not os.path.isdir(rutaSalida):
+            raise ValueError(f"Error: La ruta de salida '{rutaSalida}' no es válida o no existe")
+        self.rutaSalida = rutaSalida
 
-    def generar_archivo_salida(self, nombre_base_original: str, resultados: list[str]) -> str:
+    def generarArchivoSalida(self, nombreBaseOriginal: str, resultados: list[str]) -> str:
         """
-        Genera un archivo .txt con los resultados del análisis.
+        Genera un archivo .txt con los resultados del analisis.
 
         El nombre del archivo sigue el formato: nombreDelValor_FechaActual_SerialArchivo.txt
 
         Args:
-            nombre_base_original (str): El nombre base del archivo .bin original (ej. "nombreDelValor").
-                                         Se usará como prefijo para el nombre del archivo de salida.
-            resultados (list[str]): Una lista de cadenas, donde cada cadena es una línea de resultado.
+            nombreBaseOriginal (str): El nombre base del archivo .bin original (ej. "nombreDelValor")
+                                         Se usara como prefijo para el nombre del archivo de salida
+            resultados (list[str]): Una lista de cadenas, donde cada cadena es una linea de resultado
 
         Returns:
-            str: La ruta completa del archivo generado si la operación es exitosa, None en caso de error.
+            str: La ruta completa del archivo generado si la operacion es exitosa, None en caso de error
         """
-        fecha_actual = datetime.now().strftime("%Y%m%d")
+        fechaActual = datetime.now().strftime("%Y%m%d")
         serial = random.randint(0, 100)
         
-        # Construye el nombre del archivo de salida según el formato especificado
-        nombre_archivo = f"{nombre_base_original}_{fecha_actual}_{serial}.txt"
-        ruta_completa_archivo = os.path.join(self.ruta_salida, nombre_archivo)
+        nombreArchivo = f"{nombreBaseOriginal}_{fechaActual}_{serial}.txt"
+        rutaCompletaArchivo = os.path.join(self.rutaSalida, nombreArchivo)
         
         try:
-            with open(ruta_completa_archivo, 'w', encoding='utf-8') as archivo:
+            with open(rutaCompletaArchivo, 'w', encoding='utf-8') as archivo:
                 for resultado in resultados:
                     archivo.write(resultado + "\n")
-            print(f"Archivo de resultados generado: {ruta_completa_archivo}")
-            return ruta_completa_archivo
+            print(f"Archivo de resultados generado: {rutaCompletaArchivo}")
+            return rutaCompletaArchivo
         except IOError as e:
-            print(f"Error de E/S al generar el archivo '{nombre_archivo}': {e}")
+            print(f"Error de E/S al generar el archivo '{nombreArchivo}': {e}")
             return None
         except Exception as e:
-            print(f"Error inesperado al generar archivo '{nombre_archivo}': {e}")
+            print(f"Error inesperado al generar archivo '{nombreArchivo}': {e}")
             return None

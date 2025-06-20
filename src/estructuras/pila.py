@@ -1,5 +1,4 @@
-# Proyecto_Calculo_Numerico/src/estructuras/pila.py
-from .lista_enlazada import ListaEnlazada
+from listaEnlazada import ListaEnlazada
 
 class Pila:
     def _init_(self):
@@ -9,8 +8,8 @@ class Pila:
         self.datos.agregar(elemento)
     
     def desapilar(self):
-        if self.esta_vacia():
-            raise IndexError("Pila vacía")
+        if self.estaVacia():
+            raise IndexError("Pila vacia")
         
         if len(self.datos) == 1:
             dato = self.datos.obtener(0)
@@ -25,10 +24,10 @@ class Pila:
         self.datos.longitud -= 1
         return dato
     
-    def esta_vacia(self):
+    def estaVacia(self):
         return len(self.datos) == 0
     
     def cima(self):
-        if self.esta_vacia():
+        if self.estaVacia():
             return None
         return self.datos.obtener(len(self.datos) - 1)

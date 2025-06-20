@@ -3,93 +3,93 @@ import random
 
 class Numero:
     def __init__(self, valor: str):
-        self.valor_original = valor
+        self.valorOriginal = valor
         self.bases = np.array([], dtype=int)
-        self.formas_normalizadas = np.array([], dtype=object)
-        self.cifras_significativas = np.array([], dtype=int)
-        self.operaciones_posibles = np.array([], dtype=object)
-        self.es_valido = True
-        self.mensaje_error = ""
+        self.formasNormalizadas = np.array([], dtype=object)
+        self.cifrasSignificativas = np.array([], dtype=int)
+        self.operacionesPosibles = np.array([], dtype=object)
+        self.esValido = True
+        self.mensajeError = ""
         
-        self._procesar_valor()
-        self._validar_sistemas_numericos()
+        self.procesarValor()
+        self.validarSistemasNumericos()
 
-    def _validar_sistemas_numericos(self):
+    def validarSistemasNumericos(self):
         if len(self.bases) == 0:
-            self.es_valido = False
-            self.mensaje_error = f"Invalido: '{self.valor_original}' no es binario, decimal ni hexadecimal"
+            self.esValido = False
+            self.mensajeError = f"Invalido: '{self.valorOriginal}' no es binario, decimal ni hexadecimal"
     
-    def _procesar_valor(self):
-        valor = self.valor_original.lower()
+    def procesarValor(self):
+        valor = self.valorOriginal.lower()
         
-        bases_validas = []
-        if self._es_binario(valor):
-            bases_validas.append(2)
-        if self._es_decimal(valor):
-            bases_validas.append(10)
-        if self._es_hexadecimal(valor):
-            bases_validas.append(16)
+        basesValidas = []
+        if self.esBinario(valor):
+            basesValidas.append(2)
+        if self.esDecimal(valor):
+            basesValidas.append(10)
+        if self.esHexadecimal(valor):
+            basesValidas.append(16)
         
-        self.bases = np.array(bases_validas, dtype=int)
+        self.bases = np.array(basesValidas, dtype=int)
         
         formas = []
         cifras = []
         operaciones = []
         
-        for base in bases_validas:
-            forma = self._calcular_forma_normalizada(valor, base)
-            cifra = self._contar_cifras_significativas(valor, base)
+        for base in basesValidas:
+            forma = self.calcularFormaNormalizada(valor, base)
+            cifra = self.contarCifrasSignificativas(valor, base)
             
             formas.append(forma)
             cifras.append(cifra)
             
-            ops_demostrables_simbolos = self._demostrar_operaciones_por_computo(valor, base)
-            operaciones.append(ops_demostrables_simbolos)
+            opsDemostrablesSimbolos = self.demostrarOperacionesPorComputo(valor, base)
+            operaciones.append(opsDemostrablesSimbolos)
         
-        self.formas_normalizadas = np.array(formas, dtype=object)
-        self.cifras_significativas = np.array(cifras, dtype=int)
-        self.operaciones_posibles = np.array(operaciones, dtype=object)
+        self.formasNormalizadas = np.array(formas, dtype=object)
+        self.cifrasSignificativas = np.array(cifras, dtype=int)
+        self.operacionesPosibles = np.array(operaciones, dtype=object)
     
-    def _es_binario(self, valor: str) -> bool:
-        tiene_punto = False
+    def esBinario(self, valor: str) -> bool:
+        tienePunto = False
         for char in valor:
             if char == '.':
-                if tiene_punto: return False 
-                tiene_punto = True
+                if tienePunto: return False 
+                tienePunto = True
             elif char not in '01':
                 return False
         return True
     
-    def _es_decimal(self, valor: str) -> bool:
-        tiene_punto = False
+    def esDecimal(self, valor: str) -> bool:
+        tienePunto = False
         for char in valor:
             if char == '.':
-                if tiene_punto: return False 
-                tiene_punto = True
+                if tienePunto: return False 
+                tienePunto = True
             elif char not in '0123456789':
                 return False
         return True
     
-    def _es_hexadecimal(self, valor: str) -> bool:
-        tiene_punto = False
+    def esHexadecimal(self, valor: str) -> bool:
+        tienePunto = False
         for char in valor:
             if char == '.':
-                if tiene_punto: return False 
-                tiene_punto = True
+                if tienePunto: return False 
+                tienePunto = True
             elif char not in '0123456789abcdef':
                 return False
         return True
     
-    def _calcular_forma_normalizada(self, valor: str, base: int) -> str:
-        punto_indice = -1
+    def calcularFormaNormalizada(self, valor: str, base: int) -> str:
+        puntoIndice = -1
         for i in range(len(valor)):
             if valor[i] == '.':
-                punto_indice = i
+                puntoIndice = i
                 break
         
-        if punto_indice != -1:
-            entera = valor[0:punto_indice]
-            decimal = valor[punto_indice+1:]
+        if puntoIndice != -1:
+            entera = valor[0:puntoIndice]
+            decimal = valor[puntoIndice+1:]
         else:
             entera = valor
             decimal = ""
@@ -112,14 +112,14 @@ class Numero:
                 for char in decimal:
                     mantisa += char
         elif decimal:
-            inicio_dec = 0
-            while inicio_dec < len(decimal) and decimal[inicio_dec] == '0':
-                inicio_dec += 1
-            if inicio_dec < len(decimal):
-                mantisa = decimal[inicio_dec]
-                for i in range(inicio_dec + 1, len(decimal)):
+            inicioDec = 0
+            while inicioDec < len(decimal) and decimal[inicioDec] == '0':
+                inicioDec += 1
+            if inicioDec < len(decimal):
+                mantisa = decimal[inicioDec]
+                for i in range(inicioDec + 1, len(decimal)):
                     mantisa += decimal[i]
-                exponente = -inicio_dec - 1
+                exponente = -inicioDec - 1
             else:
                 return "0"
         else:
@@ -127,109 +127,109 @@ class Numero:
         
         return f"{mantisa} x {base}^{exponente}"
     
-    def _contar_cifras_significativas(self, valor: str, base: int) -> int:
-        es_negativo = False
+    def contarCifrasSignificativas(self, valor: str, base: int) -> int:
+        esNegativo = False
         if len(valor) > 0 and valor[0] == '-':
-            es_negativo = True
-            valor_procesado = ""
+            esNegativo = True
+            valorProcesado = ""
             for i in range(1, len(valor)):
-                valor_procesado += valor[i]
+                valorProcesado += valor[i]
         else:
-            valor_procesado = valor
+            valorProcesado = valor
 
-        valor_sin_punto = ""
-        tiene_punto = False
-        for char in valor_procesado:
+        valorSinPunto = ""
+        tienePunto = False
+        for char in valorProcesado:
             if char == '.':
-                tiene_punto = True
+                tienePunto = True
             else:
-                valor_sin_punto += char
+                valorSinPunto += char
             
-        inicio_significativo = 0
-        while inicio_significativo < len(valor_sin_punto) and valor_sin_punto[inicio_significativo] == '0':
-            inicio_significativo += 1
+        inicioSignificativo = 0
+        while inicioSignificativo < len(valorSinPunto) and valorSinPunto[inicioSignificativo] == '0':
+            inicioSignificativo += 1
         
-        if inicio_significativo == len(valor_sin_punto):
+        if inicioSignificativo == len(valorSinPunto):
             return 1 
 
-        if tiene_punto: 
-            return len(valor_sin_punto) - inicio_significativo
+        if tienePunto: 
+            return len(valorSinPunto) - inicioSignificativo
         else: 
-            valor_sin_ceros_izquierda = ""
-            encontro_digito_no_cero = False
-            for char in valor_procesado:
+            valorSinCerosIzquierda = ""
+            encontroDigitoNoCero = False
+            for char in valorProcesado:
                 if char != '0':
-                    encontro_digito_no_cero = True
-                if encontro_digito_no_cero:
-                    valor_sin_ceros_izquierda += char
+                    encontroDigitoNoCero = True
+                if encontroDigitoNoCero:
+                    valorSinCerosIzquierda += char
             
-            if not valor_sin_ceros_izquierda:
+            if not valorSinCerosIzquierda:
                 return 1 
             
-            return len(valor_sin_ceros_izquierda)
+            return len(valorSinCerosIzquierda)
 
-    def _char_a_int(self, char_digit: str) -> int:
-        """Convierte un caracter digito (0-9, a-f) a su valor entero."""
-        if '0' <= char_digit <= '9':
-            return ord(char_digit) - ord('0')
-        elif 'a' <= char_digit <= 'f':
-            return ord(char_digit) - ord('a') + 10
+    def charAInt(self, charDigit: str) -> int:
+        """Convierte un caracter digito (0-9, a-f) a su valor entero"""
+        if '0' <= charDigit <= '9':
+            return ord(charDigit) - ord('0')
+        elif 'a' <= charDigit <= 'f':
+            return ord(charDigit) - ord('a') + 10
         return 0 
 
-    def _int_a_char(self, int_val: int) -> str:
-        """Convierte un valor entero (0-15) a su caracter digito (0-9, A-F)."""
-        if 0 <= int_val <= 9:
-            return chr(ord('0') + int_val)
-        elif 10 <= int_val <= 15:
-            return chr(ord('a') + int_val - 10)
+    def intAChar(self, intVal: int) -> str:
+        """Convierte un valor entero (0-15) a su caracter digito (0-9, A-F)"""
+        if 0 <= intVal <= 9:
+            return chr(ord('0') + intVal)
+        elif 10 <= intVal <= 15:
+            return chr(ord('a') + intVal - 10)
         return '0' 
 
-    def _pad_strings_izquierda(self, s1: str, s2: str, pad_char='0') -> tuple[str, str]:
-        """Rellena con un caracter a la izquierda para igualar longitudes."""
-        max_len = len(s1) if len(s1) > len(s2) else len(s2)
-        padded_s1 = pad_char * (max_len - len(s1)) + s1
-        padded_s2 = pad_char * (max_len - len(s2)) + s2
-        return padded_s1, padded_s2
+    def padStringsIzquierda(self, s1: str, s2: str, padChar='0') -> tuple[str, str]:
+        """Rellena con un caracter a la izquierda para igualar longitudes"""
+        maxLen = len(s1) if len(s1) > len(s2) else len(s2)
+        paddedS1 = padChar * (maxLen - len(s1)) + s1
+        paddedS2 = padChar * (maxLen - len(s2)) + s2
+        return paddedS1, paddedS2
 
-    def _eliminar_ceros_izquierda(self, num_str: str) -> str:
-        """Elimina ceros a la izquierda de una cadena numerica."""
-        if len(num_str) == 0:
+    def eliminarCerosIzquierda(self, numStr: str) -> str:
+        """Elimina ceros a la izquierda de una cadena numerica"""
+        if len(numStr) == 0:
             return '0'
         idx = 0
-        while idx < len(num_str) - 1 and num_str[idx] == '0':
+        while idx < len(numStr) - 1 and numStr[idx] == '0':
             idx += 1
-        return num_str[idx:]
+        return numStr[idx:]
 
-    def _sumar_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
-        """Suma dos numeros representados como cadenas en una base dada."""
-        num1_padded, num2_padded = self._pad_strings_izquierda(num1_str, num2_str)
+    def sumarCadenasManual(self, num1Str: str, num2Str: str, base: int) -> str:
+        """Suma dos numeros representados como cadenas en una base dada"""
+        num1Padded, num2Padded = self.padStringsIzquierda(num1Str, num2Str)
         
         result = []
         carry = 0
         
-        for i in range(len(num1_padded) - 1, -1, -1):
-            digit1_val = self._char_a_int(num1_padded[i])
-            digit2_val = self._char_a_int(num2_padded[i])
+        for i in range(len(num1Padded) - 1, -1, -1):
+            digit1Val = self.charAInt(num1Padded[i])
+            digit2Val = self.charAInt(num2Padded[i])
             
-            current_sum = digit1_val + digit2_val + carry
-            digit_result = current_sum % base
-            carry = current_sum // base 
+            currentSum = digit1Val + digit2Val + carry
+            digitResult = currentSum % base
+            carry = currentSum // base 
             
-            result.append(self._int_a_char(digit_result))
+            result.append(self.intAChar(digitResult))
             
         if carry > 0:
-            result.append(self._int_a_char(carry))
+            result.append(self.intAChar(carry))
             
         final_result = "".join(reversed(result))
-        return self._eliminar_ceros_izquierda(final_result)
+        return self.eliminarCerosIzquierda(final_result)
 
-    def _es_mayor_o_igual(self, num1_str: str, num2_str: str, base: int) -> bool:
-        """Compara si num1_str es mayor o igual que num2_str en una base dada."""
-        num1_cleaned = self._eliminar_ceros_izquierda(num1_str)
-        num2_cleaned = self._eliminar_ceros_izquierda(num2_str)
+    def esMayorOIgual(self, num1Str: str, num2Str: str, base: int) -> bool:
+        """Compara si num1Str es mayor o igual que num2Str en una base dada"""
+        num1Cleaned = self.eliminarCerosIzquierda(num1Str)
+        num2Cleaned = self.eliminarCerosIzquierda(num2Str)
 
-        len1 = len(num1_cleaned)
-        len2 = len(num2_cleaned)
+        len1 = len(num1Cleaned)
+        len2 = len(num2Cleaned)
 
         if len1 > len2:
             return True
@@ -237,8 +237,8 @@ class Numero:
             return False
 
         for i in range(len1):
-            digit1 = self._char_a_int(num1_cleaned[i])
-            digit2 = self._char_a_int(num2_cleaned[i])
+            digit1 = self.charAInt(num1Cleaned[i])
+            digit2 = self.charAInt(num2Cleaned[i])
             if digit1 > digit2:
                 return True
             if digit1 < digit2:
@@ -246,164 +246,164 @@ class Numero:
         
         return True 
 
-    def _restar_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
+    def restarCadenasManual(self, num1Str: str, num2Str: str, base: int) -> str:
         """Resta dos numeros representados como cadenas en una base dada (num1 - num2).
-           Asume num1 >= num2. No maneja negativos.
+           Asume num1 >= num2. No maneja negativos
         """
-        if not self._es_mayor_o_igual(num1_str, num2_str, base):
+        if not self.esMayorOIgual(num1Str, num2Str, base):
             return "ERROR: Resultado negativo (no soportado)"
         
-        num1_padded, num2_padded = self._pad_strings_izquierda(num1_str, num2_str)
+        num1Padded, num2Padded = self.padStringsIzquierda(num1Str, num2Str)
         
         result = []
         borrow = 0
         
-        for i in range(len(num1_padded) - 1, -1, -1):
-            digit1_val = self._char_a_int(num1_padded[i])
-            digit2_val = self._char_a_int(num2_padded[i])
+        for i in range(len(num1Padded) - 1, -1, -1):
+            digit1Val = self.charAInt(num1Padded[i])
+            digit2Val = self.charAInt(num2Padded[i])
             
-            current_diff = digit1_val - digit2_val - borrow
+            currentDiff = digit1Val - digit2Val - borrow
             
-            if current_diff < 0:
-                current_diff += base
+            if currentDiff < 0:
+                currentDiff += base
                 borrow = 1
             else:
                 borrow = 0
             
-            result.append(self._int_a_char(current_diff))
+            result.append(self.intAChar(currentDiff))
             
-        final_result = "".join(reversed(result))
-        return self._eliminar_ceros_izquierda(final_result)
+        finalResult = "".join(reversed(result))
+        return self.eliminarCerosIzquierda(finalResult)
 
-    def _multiplicar_un_digito(self, num_str: str, digit_char: str, base: int) -> str:
-        """Multiplica una cadena numerica por un solo digito en la misma base."""
-        if digit_char == '0':
+    def multiplicarUnDigito(self, numStr: str, digitChar: str, base: int) -> str:
+        """Multiplica una cadena numerica por un solo digito en la misma base"""
+        if digitChar == '0':
             return '0'
         
-        digit_val = self._char_a_int(digit_char)
+        digitVal = self.charAInt(digitChar)
         
         result = []
         carry = 0
         
-        for i in range(len(num_str) - 1, -1, -1):
-            num_digit_val = self._char_a_int(num_str[i])
-            product = num_digit_val * digit_val + carry 
+        for i in range(len(numStr) - 1, -1, -1):
+            numDigitVal = self.charAInt(numStr[i])
+            product = numDigitVal * digitVal + carry 
             
-            result_digit = product % base
+            resultDigit = product % base
             carry = product // base
             
-            result.append(self._int_a_char(result_digit))
+            result.append(self.intAChar(resultDigit))
             
         if carry > 0:
-            result.append(self._int_a_char(carry))
+            result.append(self.intAChar(carry))
             
         return "".join(reversed(result))
 
-    def _multiplicar_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
-        """Multiplica dos numeros representados como cadenas en una base dada."""
-        if num1_str == '0' or num2_str == '0':
+    def multiplicarCadenasManual(self, num1Str: str, num2Str: str, base: int) -> str:
+        """Multiplica dos numeros representados como cadenas en una base dada"""
+        if num1Str == '0' or num2Str == '0':
             return '0'
         
-        num1_str = self._eliminar_ceros_izquierda(num1_str)
-        num2_str = self._eliminar_ceros_izquierda(num2_str)
+        num1Str = self.eliminarCerosIzquierda(num1Str)
+        num2Str = self.eliminarCerosIzquierda(num2Str)
 
-        partial_products = []
+        partialProducts = []
         
-        for i in range(len(num2_str) - 1, -1, -1):
-            digit2_char = num2_str[i]
-            product_line = self._multiplicar_un_digito(num1_str, digit2_char, base)
+        for i in range(len(num2Str) - 1, -1, -1):
+            digit2Char = num2Str[i]
+            productLine = self.multiplicarUnDigito(num1Str, digit2Char, base)
             
-            for _ in range(len(num2_str) - 1 - i):
-                product_line += '0'
+            for _ in range(len(num2Str) - 1 - i):
+                productLine += '0'
             
-            partial_products.append(product_line)
+            partialProducts.append(productLine)
         
-        final_sum = '0'
-        for p_prod in partial_products:
-            final_sum = self._sumar_cadenas_manual(final_sum, p_prod, base)
+        finalSum = '0'
+        for pProd in partialProducts:
+            finalSum = self.sumarCadenasManual(finalSum, pProd, base)
             
-        return self._eliminar_ceros_izquierda(final_sum)
+        return self.eliminarCerosIzquierda(finalSum)
 
-    def _dividir_cadenas_manual(self, num1_str: str, num2_str: str, base: int) -> str:
-        """Divide dos numeros representados como cadenas en una base dada (num1 / num2).
-           Devuelve solo la parte entera del cociente.
-           Requiere implementacion de resta y comparacion de cadenas.
+    def dividirCadenasManual(self, num1Str: str, num2Str: str, base: int) -> str:
+        """Divide dos numeros representados como cadenas en una base dada (num1 / num2)
+           Devuelve solo la parte entera del cociente
+           Requiere implementacion de resta y comparacion de cadenas
         """
-        if num2_str == '0':
-            raise ZeroDivisionError("Division por cero no es posible.")
+        if num2Str == '0':
+            raise ZeroDivisionError("Division por cero no es posible")
 
-        num1_str = self._eliminar_ceros_izquierda(num1_str)
-        num2_str = self._eliminar_ceros_izquierda(num2_str)
+        num1Str = self.eliminarCerosIzquierda(num1Str)
+        num2Str = self.eliminarCerosIzquierda(num2Str)
         
-        if num1_str == '0':
+        if num1Str == '0':
             return '0'
         
-        if not self._es_mayor_o_igual(num1_str, num2_str, base):
+        if not self.esMayorOIgual(num1Str, num2Str, base):
             return '0'
 
         cociente = "0"
-        dividendo_actual = "" 
+        dividendoActual = "" 
         
-        for digit_char in num1_str:
-            dividendo_actual += digit_char
-            dividendo_actual = self._eliminar_ceros_izquierda(dividendo_actual) 
+        for digitChar in num1Str:
+            dividendoActual += digitChar
+            dividendoActual = self.eliminarCerosIzquierda(dividendoActual) 
             
-            current_q_digit = 0
-            while self._es_mayor_o_igual(dividendo_actual, num2_str, base):
-                dividendo_actual = self._restar_cadenas_manual(dividendo_actual, num2_str, base)
-                temp_inc = self._sumar_cadenas_manual(self._int_a_char(current_q_digit), '1', base)
-                current_q_digit = self._char_a_int(temp_inc) 
-                if len(temp_inc) > 1: 
+            currentQDigit = 0
+            while self.esMayorOIgual(dividendoActual, num2Str, base):
+                dividendoActual = self.restarCadenasManual(dividendoActual, num2Str, base)
+                tempInc = self.sumarCadenasManual(self.intAChar(currentQDigit), '1', base)
+                currentQDigit = self.charAInt(tempInc) 
+                if len(tempInc) > 1: 
                     pass 
 
-            cociente += self._int_a_char(current_q_digit)
+            cociente += self.intAChar(currentQDigit)
             
-        return self._eliminar_ceros_izquierda(cociente)
+        return self.eliminarCerosIzquierda(cociente)
 
-    def _demostrar_operaciones_por_computo(self, valor_str: str, base: int) -> str:
-        operaciones_posibles = []
+    def demostrarOperacionesPorComputo(self, valorStr: str, base: int) -> str:
+        operacionesPosibles = []
         
-        operando_dec_int = random.randint(1, 9)
+        operandoDecInt = random.randint(1, 9)
 
-        operando_str = ""
-        temp_val = operando_dec_int
+        operandoStr = ""
+        tempVal = operandoDecInt
         if base == 10:
-            operando_str = str(operando_dec_int) 
+            operandoStr = str(operandoDecInt) 
         else: 
-            if temp_val == 0:
-                operando_str = '0'
+            if tempVal == 0:
+                operandoStr = '0'
             else:
-                while temp_val > 0:
-                    remainder = temp_val % base
-                    operando_str = self._int_a_char(remainder) + operando_str
-                    temp_val = temp_val // base 
+                while tempVal > 0:
+                    remainder = tempVal % base
+                    operandoStr = self.intAChar(remainder) + operandoStr
+                    tempVal = tempVal // base 
         
-        if '.' in valor_str:
+        if '.' in valorStr:
             return "" 
         
         try:
-            self._sumar_cadenas_manual(valor_str, operando_str, base)
-            operaciones_posibles.append('+')
+            self.sumarCadenasManual(valorStr, operandoStr, base)
+            operacionesPosibles.append('+')
         except Exception:
             pass
 
         try:
-            if self._es_mayor_o_igual(valor_str, operando_str, base):
-                self._restar_cadenas_manual(valor_str, operando_str, base)
-                operaciones_posibles.append('-')
+            if self.esMayorOIgual(valorStr, operandoStr, base):
+                self.restarCadenasManual(valorStr, operandoStr, base)
+                operacionesPosibles.append('-')
         except Exception:
             pass
         
         try:
-            self._multiplicar_cadenas_manual(valor_str, operando_str, base)
-            operaciones_posibles.append('*')
+            self.multiplicarCadenasManual(valorStr, operandoStr, base)
+            operacionesPosibles.append('*')
         except Exception:
             pass
         
         try:
-            if operando_str != '0': 
-                self._dividir_cadenas_manual(valor_str, operando_str, base)
-                operaciones_posibles.append('/')
+            if operandoStr != '0': 
+                self.dividirCadenasManual(valorStr, operandoStr, base)
+                operacionesPosibles.append('/')
             else:
                 pass 
         except ZeroDivisionError:
@@ -411,25 +411,24 @@ class Numero:
         except Exception:
             pass
         
-        return "".join(operaciones_posibles)
-
-    def resultado_completo(self) -> str:
-        if not self.es_valido:
-            return f"{self.valor_original} | {self.mensaje_error}"
+        return "".join(operacionesPosibles)
+    def resultadoCompleto(self) -> str:
+        if not self.esValido:
+            return f"{self.valorOriginal} | {self.mensajeError}"
         
-        salida = f"{self.valor_original}"
+        salida = f"{self.valorOriginal}"
         
         for i in range(len(self.bases)):
             salida += (
                 f"|Base:{self.bases[i]}"
-                f"|Forma:{self.formas_normalizadas[i]}"
-                f"|Cifras:{self.cifras_significativas[i]}"
-                f"|Operaciones:{self.operaciones_posibles[i]}"
+                f"|Forma:{self.formasNormalizadas[i]}"
+                f"|Cifras:{self.cifrasSignificativas[i]}"
+                f"|Operaciones:{self.operacionesPosibles[i]}"
             )
         
         return salida
 
 num = Numero("10")
-print(num.resultado_completo())
+print(num.resultadoCompleto())
 num = Numero("1010")
-print(num.resultado_completo())
+print(num.resultadoCompleto())

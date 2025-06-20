@@ -1,4 +1,3 @@
-# Proyecto_Calculo_Numerico/src/estructuras/lista_enlazada.py
 class Nodo:
     def __init__(self, dato):
         self.dato = dato
@@ -10,19 +9,19 @@ class ListaEnlazada:
         self.longitud = 0
 
     def agregar(self, dato):
-        nuevo_nodo = Nodo(dato)
+        nuevoNodo = Nodo(dato)
         if not self.cabeza:
-            self.cabeza = nuevo_nodo
+            self.cabeza = nuevoNodo
         else:
             actual = self.cabeza
             while actual.siguiente:
                 actual = actual.siguiente
-            actual.siguiente = nuevo_nodo
+            actual.siguiente = nuevoNodo
         self.longitud += 1
 
     def obtener(self, indice):
         if indice < 0 or indice >= self.longitud:
-            raise IndexError("Índice fuera de rango")
+            raise IndexError("Indice fuera de rango")
         actual = self.cabeza
         for _ in range(indice):
             actual = actual.siguiente

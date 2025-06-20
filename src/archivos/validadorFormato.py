@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 
-class ValidadorFormato:
+class validadorFormato:
     @staticmethod
     def validarNombreArchivo(nombre):
         patron = r"^(.+)(\d{8})(\d+)\.txt$"
