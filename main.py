@@ -5,10 +5,10 @@ from src.utilidades.Generador import GeneradorArchivos
 
 def main():
     ruta_carpeta_archivos_bin = os.path.join('src', 'archivos')
-    # Modifica la ruta de salida para que apunte a 'ArchivosDeSalida'
+    
     ruta_carpeta_salida = os.path.join('src', 'ArchivosDeSalida') 
 
-    # Asegura que la carpeta de salida exista antes de pasarla a GeneradorArchivos
+    
     os.makedirs(ruta_carpeta_salida, exist_ok=True) 
 
     lector = LectorArchivosBin(ruta_carpeta_archivos_bin)
@@ -17,7 +17,7 @@ def main():
     generador = GeneradorArchivos(ruta_carpeta_salida)
 
     if not archivos_para_procesar:
-        print("No hay archivos .bin válidos para procesar.")
+        print("No hay archivos .bin válidos para procesar")
         return
 
     for nombre_archivo_bin, matriz_datos in archivos_para_procesar:
