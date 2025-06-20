@@ -4,53 +4,53 @@ from src.numeros.CalculosNumericos import Numero
 from src.utilidades.Generador import GeneradorArchivos
 
 def main():
-    ruta_carpeta_archivos_bin = os.path.join('src', 'archivos')
+    rutaCarpetaArchivosBin = os.path.join('src', 'archivos')
     
-    ruta_carpeta_salida = os.path.join('src', 'ArchivosDeSalida') 
+    rutaCarpetaSalida = os.path.join('src', 'ArchivosDeSalida') 
 
     
-    os.makedirs(ruta_carpeta_salida, exist_ok=True) 
+    os.makedirs(rutaCarpetaSalida, existOk=True) 
 
-    lector = LectorArchivosBin(ruta_carpeta_archivos_bin)
-    archivos_para_procesar = lector.obtener_archivos_para_procesar()
+    lector = LectorArchivosBin(rutaCarpetaArchivosBin)
+    archivosParaProcesar = lector.obtenerArchivosParaProcesar()
 
-    generador = GeneradorArchivos(ruta_carpeta_salida)
+    generador = GeneradorArchivos(rutaCarpetaSalida)
 
-    if not archivos_para_procesar:
-        print("No hay archivos .bin válidos para procesar")
+    if not archivosParaProcesar:
+        print("No hay archivos .bin validos para procesar")
         return
 
-    for nombre_archivo_bin, matriz_datos in archivos_para_procesar:
-        print(f"Procesando datos de: {nombre_archivo_bin}")
+    for nombreArchivoBin, matrizDatos in archivosParaProcesar:
+        print(f"Procesando datos de: {nombreArchivoBin}")
         
-        resultados_para_txt = []
-        filas, columnas = matriz_datos.dimensiones()
+        resultadosParaTxt = []
+        filas, columnas = matrizDatos.dimensiones()
 
         for r in range(filas):
             for c in range(columnas):
-                valor_original = matriz_datos.obtener_elemento(r, c)
-                if valor_original is None:
+                valorOriginal = matrizDatos.obtenerElemento(r, c)
+                if valorOriginal is None:
                     continue 
 
-                if valor_original.startswith("Ocho:"):
-                    resultados_para_txt.append(f"{valor_original} | Excluido (Octal)")
-                elif valor_original.startswith("z%:"):
-                    resultados_para_txt.append(f"{valor_original} | No reconocido")
+                if valorOriginal.startswith("Ocho:"):
+                    resultadosParaTxt.append(f"{valorOriginal} | Excluido (Octal)")
+                elif valorOriginal.startswith("z%:"):
+                    resultadosParaTxt.append(f"{valorOriginal} | No reconocido")
                 else:
                     try:
-                        num = Numero(valor_original)
-                        resultados_para_txt.append(num.resultado_completo())
+                        num = Numero(valorOriginal)
+                        resultadosParaTxt.append(num.resultadoCompleto())
                     except Exception as e:
-                        resultados_para_txt.append(f"{valor_original} | Error al procesar: {e}")
+                        resultadosParaTxt.append(f"{valorOriginal} | Error al procesar: {e}")
 
-        nombre_base_original = os.path.splitext(nombre_archivo_bin)[0].split('_')[0]
+        nombreBaseOriginal = os.path.splitext(nombreArchivoBin)[0].split('_')[0]
 
-        nombre_archivo_generado = generador.generar_archivo_salida(nombre_base_original, resultados_para_txt)
+        nombreArchivoGenerado = generador.generarArchivoSalida(nombreBaseOriginal, resultadosParaTxt)
         
-        if nombre_archivo_generado:
-            print(f"Resultados de '{nombre_archivo_bin}' guardados en: {nombre_archivo_generado}")
+        if nombreArchivoGenerado:
+            print(f"Resultados de '{nombreArchivoBin}' guardados en: {nombreArchivoGenerado}")
         else:
-            print(f"No se pudo generar el archivo de salida para '{nombre_archivo_bin}'.")
+            print(f"No se pudo generar el archivo de salida para '{nombreArchivoBin}'.")
 
 if __name__ == "__main__":
     main()
