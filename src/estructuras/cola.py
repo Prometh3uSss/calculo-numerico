@@ -1,4 +1,4 @@
-from .listaEnlazada import ListaEnlazada
+from listaEnlazada import ListaEnlazada
 
 class Cola:
     def _init_(self):

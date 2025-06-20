@@ -1,12 +1,12 @@
 
-from ..estructuras.listaEnlazada import ListaEnlazada
-from ..numeros.binario import Binario
-from ..numeros.decimal import Decimal
-from ..numeros.hexadecimal import Hexadecimal
-from .validadorFormato import ValidadorFormato
-from ..errores.tiposErrores import FormatoNumeroInvalidoError, NombreArchivoError
+from estructuras.listaEnlazada import ListaEnlazada
+from numeros.binario import Binario
+from numeros.decimal import Decimal
+from numeros.hexadecimal import Hexadecimal
+from validadorFormato import ValidadorFormato
+from errores.tiposErrores import FormatoNumeroInvalidoError, NombreArchivoError
 
-class LectorArchivos:
+class lectorArchivos:
     def _init_(self):
         self.datos = ListaEnlazada()
     
