@@ -1,33 +1,26 @@
 from listaEnlazada import ListaEnlazada
 
 class Pila:
-    def _init_(self):
+    def __init__(self):  # Corregido: __init__
         self.datos = ListaEnlazada()
     
     def apilar(self, elemento):
-        self.datos.agregar(elemento)
+        # Insertar al inicio para O(1)
+        nuevo_nodo = Nodo(elemento)
+        nuevo_nodo.siguiente = self.datos.cabeza
+        self.datos.cabeza = nuevo_nodo
+        self.datos.longitud += 1
     
     def desapilar(self):
-        if self.estaVacia():
-            raise IndexError("Pila vacia")
-        
-        if len(self.datos) == 1:
-            dato = self.datos.obtener(0)
-            self.datos = ListaEnlazada()
-            return dato
-        
-        actual = self.datos.cabeza
-        for _ in range(len(self.datos) - 2):
-            actual = actual.siguiente
-        dato = actual.siguiente.dato
-        actual.siguiente = None
+        if self.esta_vacia():
+            raise IndexError("Pila vacía")
+        dato = self.datos.cabeza.dato
+        self.datos.cabeza = self.datos.cabeza.siguiente
         self.datos.longitud -= 1
         return dato
     
-    def estaVacia(self):
-        return len(self.datos) == 0
+    def esta_vacia(self):
+        return self.datos.longitud == 0
     
     def cima(self):
-        if self.estaVacia():
-            return None
-        return self.datos.obtener(len(self.datos) - 1)
+        return self.datos.cabeza.dato if not self.esta_vacia() else None
