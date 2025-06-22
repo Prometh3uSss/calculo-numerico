@@ -1,51 +1,82 @@
 import os
-from datetime import datetime
 import random
+from datetime import datetime
+from ..estructuras.listaEnlazada import LinkedList
 
-class generadorArchivos:
-    """
-    Clase encargada de generar archivos de texto con los resultados del analisis numerico
-    """
-    def __init__(self, rutaSalida: str):
+class FileGenerator:
+    def __init__(self, outputPath: str):
         """
-        Inicializa el generador con la ruta donde se guardarán los archivos
-
-        Args:
-            ruta_salida (str): La ruta del directorio donde se crearan los archivos .txt.
-        """
-        if not rutaSalida or not os.path.isdir(rutaSalida):
-            raise ValueError(f"Error: La ruta de salida '{rutaSalida}' no es válida o no existe")
-        self.rutaSalida = rutaSalida
-
-    def generarArchivoSalida(self, nombreBaseOriginal: str, resultados: list[str]) -> str:
-        """
-        Genera un archivo .txt con los resultados del analisis.
-
-        El nombre del archivo sigue el formato: nombreDelValor_FechaActual_SerialArchivo.txt
-
-        Args:
-            nombreBaseOriginal (str): El nombre base del archivo .bin original (ej. "nombreDelValor")
-                                         Se usara como prefijo para el nombre del archivo de salida
-            resultados (list[str]): Una lista de cadenas, donde cada cadena es una linea de resultado
-
-        Returns:
-            str: La ruta completa del archivo generado si la operacion es exitosa, None en caso de error
-        """
-        fechaActual = datetime.now().strftime("%Y%m%d")
-        serial = random.randint(0, 100)
+        Inicializa el generador con la ruta de salida
         
-        nombreArchivo = f"{nombreBaseOriginal}_{fechaActual}_{serial}.txt"
-        rutaCompletaArchivo = os.path.join(self.rutaSalida, nombreArchivo)
+        Args:
+            outputPath: Directorio donde se guardarán los archivos
+        """
+        self.outputPath = outputPath
+        self.checkDirectory()
+    
+    def checkDirectory(self):
+        """Crea el directorio de salida si no existe"""
+        if not os.path.exists(self.outputPath):
+            try:
+                os.makedirs(self.outputPath)
+                print(f"Directorio creado: {self.outputPath}")
+            except OSError as e:
+                raise OSError(f"No se pudo crear el directorio: {str(e)}")
+    
+    def generateOutputFile(self, baseName: str, resultsList: LinkedList) -> str:
+        """
+        Genera un archivo de salida con los resultados del análisis
+        
+        Args:
+            baseName: Parte inicial del nombre del archivo (ej: "entrada")
+            resultsList: Lista enlazada con los resultados a escribir
+            
+        Returns:
+            Ruta completa del archivo generado, o None si hubo error
+        """
+        if not baseName or not resultsList or resultsList.length == 0:
+            print("Advertencia: Datos insuficientes para generar archivo")
+            return None
+        
+        # Generar nombre de archivo con formato
+        fileName = self.generateFileName(baseName)
+        fullPath = os.path.join(self.outputPath, fileName)
         
         try:
-            with open(rutaCompletaArchivo, 'w', encoding='utf-8') as archivo:
-                for resultado in resultados:
-                    archivo.write(resultado + "\n")
-            print(f"Archivo de resultados generado: {rutaCompletaArchivo}")
-            return rutaCompletaArchivo
-        except IOError as e:
-            print(f"Error de E/S al generar el archivo '{nombreArchivo}': {e}")
-            return None
+            # Escribir resultados usando estructuras propias
+            self.writeResults(fullPath, resultsList)
+            return fullPath
         except Exception as e:
-            print(f"Error inesperado al generar archivo '{nombreArchivo}': {e}")
+            print(f"Error al generar archivo {fileName}: {str(e)}")
             return None
+    
+    def generateFileName(self, baseName: str) -> str:
+        """
+        Genera un nombre de archivo con formato: nombre_Fecha_Serial.txt
+        
+        Args:
+            baseName: Parte inicial del nombre
+            
+        Returns:
+            Nombre de archivo completo
+        """
+        currentDate = datetime.now().strftime("%Y%m%d")
+        serialNumber = random.randint(1, 9999)  # Serial de 1 a 9999
+        return f"{baseName}{currentDate}{serialNumber:04d}.txt"
+    
+    def writeResults(self, filePath: str, resultsList: LinkedList):
+        """
+        Escribe los resultados en un archivo usando estructuras propias
+        
+        Args:
+            filePath: Ruta completa del archivo a escribir
+            resultsList: Lista enlazada con los resultados
+        """
+        # Usamos un nodo temporal para recorrer la lista
+        currentNode = resultsList.head
+        
+        with open(filePath, 'w', encoding='utf-8') as outputFile:
+            while currentNode:
+                # Escribir cada resultado en una línea
+                outputFile.write(currentNode.data + "\n")
+                currentNode = currentNode.next
