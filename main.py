@@ -1,165 +1,288 @@
+"""
+Punto de entrada principal del sistema de cálculo numérico
+Implementa el flujo completo de procesamiento usando estructuras propias
+Cumple con los estándares de nomenclatura camelCase y comentarios en español
+"""
+
 import os
 import time
-from src.archivos.lectorArchivos import FileReader  # Cambiado a FileReader
-from src.utilidades.Generador import FileGenerator  # Asumiendo nuevo nombre
-from src.estructuras.listaEnlazada import LinkedList
-from src.errores.tiposErrores import InvalidNumberFormatError, FileNameError
-from src.errores.calculadoraErrores import ErrorCalculator
+from estructuras.Stack import Stack
+from estructuras.LinkedList import LinkedList
+from archivos.FileReader import FileReader
+from utilidades.FileGenerator import FileGenerator
+from numeros.Binary import Binary
+from numeros.Decimal import Decimal
+from numeros.Hexadecimal import Hexadecimal
+from errores.ErrorCalculator import ErrorCalculator
+from errores.CustomExceptions import FileProcessingException, NumberProcessingException
 
 def main():
-    # Configurar rutas
-    dataFolderPath = os.path.join(os.getcwd(), 'data')
-    outputFolderPath = os.path.join(os.getcwd(), 'salida')
-    
-    # Crear carpeta de salida si no existe
-    if not os.path.exists(outputFolderPath):
-        os.makedirs(outputFolderPath)
-    
-    # Inicializar componentes
-    fileReader = FileReader()
-    fileGenerator = FileGenerator(outputFolderPath)  # Asumiendo nuevo nombre
-    
-    # Obtener lista de archivos a procesar
-    filesToProcess = getDataFiles(dataFolderPath)
-    
-    if not filesToProcess:
-        print("No se encontraron archivos válidos para procesar en la carpeta 'data'")
-        return
-    
-    # Procesar cada archivo
-    for filePath in filesToProcess:
-        processFile(filePath, fileReader, fileGenerator)
+    """
+    Función principal que coordina el flujo completo del programa
+    """
+    try:
+        # 1. Configuración inicial
+        dataFolderPath = os.path.join(os.getcwd(), 'data')
+        outputFolderPath = os.path.join(os.getcwd(), 'output')
+        
+        # 2. Preparar entorno
+        prepareEnvironment(outputFolderPath)
+        
+        # 3. Inicializar componentes
+        fileReader = FileReader()
+        fileGenerator = FileGenerator(outputFolderPath)
+        
+        # 4. Obtener archivos a procesar
+        filesToProcess = getFilesToProcess(dataFolderPath)
+        
+        if filesToProcess.isEmpty():
+            print("No se encontraron archivos válidos para procesar en la carpeta 'data'")
+            return
+        
+        # 5. Procesar cada archivo
+        processAllFiles(filesToProcess, fileReader, fileGenerator)
+        
+    except Exception as generalError:
+        print(f"Error crítico en la ejecución: {str(generalError)}")
 
-def getDataFiles(folderPath: str) -> list:
-    """Obtiene la lista de archivos .txt en la carpeta data"""
-    fileList = []
+def prepareEnvironment(outputPath: str):
+    """
+    Crea el directorio de salida si no existe
+    
+    Args:
+        outputPath: Ruta del directorio de salida
+    """
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+        print(f"Directorio de salida creado: {outputPath}")
+
+def getFilesToProcess(folderPath: str) -> LinkedList:
+    """
+    Obtiene la lista de archivos .txt en la carpeta especificada
+    
+    Args:
+        folderPath: Ruta de la carpeta a escanear
+        
+    Returns:
+        Lista enlazada con rutas completas de archivos
+    """
+    fileList = LinkedList()
+    
     try:
         for fileName in os.listdir(folderPath):
             if fileName.endswith('.txt'):
                 fullPath = os.path.join(folderPath, fileName)
-                fileList.append(fullPath)
+                fileList.add(fullPath)
     except FileNotFoundError:
         print(f"Advertencia: La carpeta 'data' no existe en {folderPath}")
+    
     return fileList
 
-def processFile(filePath: str, fileReader: FileReader, fileGenerator: FileGenerator):
-    """Procesa un archivo completo y genera los resultados"""
-    fileName = os.path.basename(filePath)
-    print(f"\n{'='*50}")
-    print(f"Procesando archivo: {fileName}")
-    print(f"{'='*50}")
+def processAllFiles(filesToProcess: LinkedList, fileReader: FileReader, fileGenerator: FileGenerator):
+    """
+    Procesa todos los archivos en la lista
     
+    Args:
+        filesToProcess: Lista de rutas de archivos
+        fileReader: Instancia de FileReader
+        fileGenerator: Instancia de FileGenerator
+    """
+    currentFileNode = filesToProcess.getFirstNode()
+    
+    while currentFileNode:
+        try:
+            processSingleFile(currentFileNode.data, fileReader, fileGenerator)
+        except FileProcessingException as fileError:
+            print(f"Error procesando archivo: {str(fileError)}")
+        
+        currentFileNode = currentFileNode.next
+
+def processSingleFile(filePath: str, fileReader: FileReader, fileGenerator: FileGenerator):
+    """
+    Procesa un archivo individual y genera resultados
+    
+    Args:
+        filePath: Ruta completa al archivo
+        fileReader: Instancia de FileReader
+        fileGenerator: Instancia de FileGenerator
+    """
     try:
         startTime = time.time()
+        fileName = os.path.basename(filePath)
         
-        # Paso 1: Leer y procesar el archivo
-        dataList = fileReader.processFile(filePath)
-        rows, columns = fileReader.getDimensions()  # Asumiendo nuevo nombre
-        print(f"Archivo procesado: {rows} filas x {columns} columnas")
+        printHeader(fileName)
         
-        # Paso 2: Calcular resultados para cada número
-        resultsList = LinkedList()
-        processData(dataList, resultsList)
+        # 1. Leer y procesar archivo
+        processedData = fileReader.processFile(filePath)
+        rowCount, colCount = fileReader.getDimensions()
+        print(f"Archivo procesado: {rowCount} filas x {colCount} columnas")
         
-        # Paso 3: Calcular errores (si hay suficientes datos)
-        calculateErrors(dataList, resultsList)
+        # 2. Calcular resultados
+        analysisResults = LinkedList()
+        calculateAnalysisResults(processedData, analysisResults)
         
-        # Paso 4: Generar archivo de salida
+        # 3. Calcular errores
+        calculateAllErrors(processedData, analysisResults)
+        
+        # 4. Generar archivo de salida
         baseName = fileName.split('_')[0]
-        outputPath = fileGenerator.generateOutputFile(baseName, resultsList)  # Asumiendo nuevo nombre
+        outputFilePath = fileGenerator.generateOutputFile(baseName, analysisResults)
         
-        # Paso 5: Mostrar estadísticas
-        elapsedTime = time.time() - startTime
-        print(f"Archivo procesado en {elapsedTime:.4f} segundos")
-        print(f"Resultados guardados en: {outputPath}")
+        # 5. Mostrar estadísticas
+        displayProcessingStats(startTime, outputFilePath, fileReader)
         
-        # Mostrar errores si los hay
-        if fileReader.errorList.length > 0:
-            print("\nErrores encontrados durante el procesamiento:")
-            currentError = fileReader.errorList.head
-            while currentError:
-                print(f"  - {currentError.data}")
-                currentError = currentError.next
-        
-    except (FileNotFoundError, IOError) as e:
-        print(f"Error de E/S: {str(e)}")
-    except FileNameError as e:
-        print(f"Error en nombre de archivo: {str(e)}")
-    except InvalidNumberFormatError as e:
-        print(f"Error en formato numérico: {str(e)}")
-    except Exception as e:
-        print(f"Error inesperado: {str(e)}")
+    except Exception as processingError:
+        raise FileProcessingException(f"Error procesando {filePath}: {str(processingError)}")
 
-def processData(dataList: LinkedList, resultsList: LinkedList):
-    """Procesa los datos y genera resultados para cada número"""
-    currentRowNode = dataList.head
-    currentRowNumber = 1
+def printHeader(fileName: str):
+    """
+    Imprime encabezado para el procesamiento de archivo
+    
+    Args:
+        fileName: Nombre del archivo a procesar
+    """
+    separator = "=" * 50
+    print(f"\n{separator}")
+    print(f"Procesando archivo: {fileName}")
+    print(f"{separator}")
+
+def calculateAnalysisResults(processedData: LinkedList, resultContainer: LinkedList):
+    """
+    Calcula los resultados de análisis para cada número
+    
+    Args:
+        processedData: Datos procesados (lista de filas)
+        resultContainer: Contenedor para almacenar resultados
+    """
+    currentRowNode = processedData.getFirstNode()
+    rowNumber = 1
     
     while currentRowNode:
-        # Procesar cada número en la fila
-        currentNumberNode = currentRowNode.data.head
-        currentColumnNumber = 1
+        rowData = currentRowNode.data
+        currentCellNode = rowData.getFirstNode()
+        colNumber = 1
         
-        while currentNumberNode:
-            # Obtener el objeto numérico
-            numberObject = currentNumberNode.data
+        while currentCellNode:
+            numberObject = currentCellNode.data
+            resultLine = formatAnalysisResult(rowNumber, colNumber, numberObject)
+            resultContainer.add(resultLine)
             
-            # Crear cadena de resultado
-            resultString = (
-                f"Fila {currentRowNumber}, Col {currentColumnNumber}: "
-                f"Valor: {numberObject.originalValue} | "
-                f"Sistema: {numberObject.getNumberSystem()} | "
-                f"Normalizado: {numberObject.getNormalizedValue()} | "
-                f"Cifras Signif: {numberObject.countSignificantDigits()} | "
-                f"Operaciones: {numberObject.getPossibleOperations()}"
-            )
-            
-            resultsList.append(resultString)
-            
-            currentNumberNode = currentNumberNode.next
-            currentColumnNumber += 1
+            currentCellNode = currentCellNode.next
+            colNumber += 1
         
         currentRowNode = currentRowNode.next
-        currentRowNumber += 1
+        rowNumber += 1
 
-def calculateErrors(dataList: LinkedList, resultsList: LinkedList):
-    """Calcula errores para los números procesados (si es posible)"""
-    # Solo calculamos errores si hay al menos 2 números
-    if dataList.length < 2:
-        return
+def formatAnalysisResult(row: int, col: int, number) -> str:
+    """
+    Formatea el resultado de análisis para un número
     
-    # Obtener los primeros dos números para comparación
-    firstNumber = dataList.head.data.head.data
-    secondNumber = dataList.head.data.head.next.data if dataList.head.data.head.next else None
+    Args:
+        row: Número de fila
+        col: Número de columna
+        number: Objeto numérico (Binary, Decimal, Hexadecimal)
+        
+    Returns:
+        Cadena formateada con resultados
+    """
+    try:
+        normalizedForm = number.getNormalizedForm()
+        significantDigits = number.getSignificantDigitCount()
+        operations = number.getSupportedOperations()
+        numberType = getNumberTypeName(number)
+        
+        return (
+            f"Fila {row}, Col {col}: "
+            f"Valor: {number.getOriginalValue()} | "
+            f"Sistema: {numberType} | "
+            f"Normalizado: {normalizedForm} | "
+            f"Cifras Signif: {significantDigits} | "
+            f"Operaciones: {operations}"
+        )
+    except Exception as formatError:
+        return f"Error formateando resultado: {str(formatError)}"
+
+def getNumberTypeName(number) -> str:
+    """
+    Devuelve el nombre del tipo de número
     
-    if not secondNumber:
+    Args:
+        number: Instancia de número
+        
+    Returns:
+        Nombre del tipo (Binario, Decimal, Hexadecimal)
+    """
+    if isinstance(number, Binary):
+        return "Binario"
+    elif isinstance(number, Decimal):
+        return "Decimal"
+    elif isinstance(number, Hexadecimal):
+        return "Hexadecimal"
+    return "Desconocido"
+
+def calculateAllErrors(processedData: LinkedList, resultContainer: LinkedList):
+    """
+    Calcula los 5 tipos de errores requeridos
+    
+    Args:
+        processedData: Datos procesados
+        resultContainer: Contenedor para agregar resultados de errores
+    """
+    if processedData.size() < 1:
         return
     
     try:
-        # Convertir a valores decimales para cálculo de errores
-        exactValue = firstNumber.toDecimal()
-        approximateValue = secondNumber.toDecimal()
+        # Obtener los primeros dos números para comparación
+        firstRow = processedData.getFirstNode().data
+        if firstRow.size() < 2:
+            return
+            
+        firstNumber = firstRow.getFirstNode().data
+        secondNumber = firstRow.getFirstNode().next.data
         
         # Calcular errores
-        absoluteError = ErrorCalculator.absoluteError(exactValue, approximateValue)
-        relativeError = ErrorCalculator.relativeError(exactValue, approximateValue)
+        errorCalculator = ErrorCalculator(firstNumber, secondNumber)
+        absoluteError = errorCalculator.calculateAbsoluteError()
+        relativeError = errorCalculator.calculateRelativeError()
+        roundingError = errorCalculator.calculateRoundingError()
+        truncationError = errorCalculator.calculateTruncationError()
+        propagationError = errorCalculator.calculatePropagationError()
         
-        # Agregar resultados de errores
-        resultsList.append("\n=== Resultados de Análisis de Errores ===")
-        resultsList.append(f"Comparación: {firstNumber.originalValue} vs {secondNumber.originalValue}")
-        resultsList.append(f"Error Absoluto: {absoluteError}")
-        resultsList.append(f"Error Relativo: {relativeError}")
+        # Agregar resultados
+        resultContainer.add("\n=== Resultados de Análisis de Errores ===")
+        resultContainer.add(f"Comparación: {firstNumber.getOriginalValue()} vs {secondNumber.getOriginalValue()}")
+        resultContainer.add(f"Error Absoluto: {absoluteError}")
+        resultContainer.add(f"Error Relativo: {relativeError}")
+        resultContainer.add(f"Error por Redondeo: {roundingError}")
+        resultContainer.add(f"Error por Truncamiento: {truncationError}")
+        resultContainer.add(f"Error por Propagación: {propagationError}")
         
-        # Calcular errores de redondeo y truncamiento para el primer número
-        significantDigits = firstNumber.countSignificantDigits()
-        roundingError = ErrorCalculator.roundingError(exactValue, significantDigits)
-        truncationError = ErrorCalculator.truncationError(exactValue, significantDigits)
-        
-        resultsList.append(f"Error por Redondeo ({firstNumber.originalValue}): {roundingError}")
-        resultsList.append(f"Error por Truncamiento ({firstNumber.originalValue}): {truncationError}")
-        
-    except Exception as e:
-        resultsList.append(f"Error al calcular errores: {str(e)}")
+    except NumberProcessingException as numError:
+        resultContainer.add(f"Error en cálculo de errores: {str(numError)}")
+    except Exception as generalError:
+        resultContainer.add(f"Error inesperado en cálculo de errores: {str(generalError)}")
+
+def displayProcessingStats(startTime: float, outputPath: str, fileReader: FileReader):
+    """
+    Muestra estadísticas del procesamiento
+    
+    Args:
+        startTime: Tiempo de inicio del procesamiento
+        outputPath: Ruta del archivo generado
+        fileReader: Instancia de FileReader para acceder a errores
+    """
+    # Calcular tiempo de procesamiento
+    processingTime = time.time() - startTime
+    print(f"Archivo procesado en {processingTime:.4f} segundos")
+    print(f"Resultados guardados en: {outputPath}")
+    
+    # Mostrar errores si los hay
+    if not fileReader.getErrors().isEmpty():
+        print("\nErrores encontrados durante el procesamiento:")
+        errorNode = fileReader.getErrors().getFirstNode()
+        while errorNode:
+            print(f"  - {errorNode.data}")
+            errorNode = errorNode.next
 
 if __name__ == "__main__":
     main()
