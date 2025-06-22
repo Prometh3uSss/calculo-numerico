@@ -1,32 +1,65 @@
-from listaEnlazada import ListaEnlazada
+from listaEnlazada import LinkedList  # Asumiendo que ListaEnlazada se renombró a LinkedList
 
-class Cola:
-    def __init__(self):  # Corregido: __init__
-        self.datos = ListaEnlazada()
-        self.ultimo = None
+class Node:
+    """Nodo para una lista enlazada"""
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class Queue:
+    def __init__(self):
+        self.dataList = LinkedList()
+        self.lastNode = None
     
-    def encolar(self, elemento):
-        nuevo_nodo = Nodo(elemento)
-        if not self.datos.cabeza:
-            self.datos.cabeza = nuevo_nodo
-            self.ultimo = nuevo_nodo
+    def enqueue(self, element):
+        """
+        Agrega un elemento al final de la cola
+        
+        Args:
+            element: Elemento a agregar
+        """
+        new_node = Node(element)
+        if not self.dataList.head:
+            self.dataList.head = new_node
+            self.lastNode = new_node
         else:
-            self.ultimo.siguiente = nuevo_nodo
-            self.ultimo = nuevo_nodo
-        self.datos.longitud += 1
+            self.lastNode.next = new_node
+            self.lastNode = new_node
+        self.dataList.length += 1
     
-    def desencolar(self):
-        if self.esta_vacia():
+    def dequeue(self):
+        """
+        Elimina y devuelve el elemento al frente de la cola
+        
+        Returns:
+            Elemento removido
+            
+        Raises:
+            IndexError: Si la cola está vacía
+        """
+        if self.isEmpty():
             raise IndexError("Cola vacía")
-        dato = self.datos.cabeza.dato
-        self.datos.cabeza = self.datos.cabeza.siguiente
-        self.datos.longitud -= 1
-        if self.esta_vacia():
-            self.ultimo = None
-        return dato
+        data = self.dataList.head.data
+        self.dataList.head = self.dataList.head.next
+        self.dataList.length -= 1
+        if self.isEmpty():
+            self.lastNode = None
+        return data
     
-    def esta_vacia(self):
-        return self.datos.longitud == 0
+    def isEmpty(self):
+        """
+        Verifica si la cola está vacía
+        
+        Returns:
+            bool: True si está vacía, False de lo contrario
+        """
+        return self.dataList.length == 0
     
-    def frente(self):
-        return self.datos.cabeza.dato if not self.esta_vacia() else None
+    def front(self):
+        """
+        Obtiene el elemento al frente de la cola sin eliminarlo
+        
+        Returns:
+            Elemento al frente o None si está vacía
+        """
+        return self.dataList.head.data if not self.isEmpty() else None

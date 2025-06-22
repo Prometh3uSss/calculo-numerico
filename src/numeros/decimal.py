@@ -1,63 +1,63 @@
-from .numero import Numero
-from ..utilidades.normalizador import normalizar_decimal
+from .numero import Number  
+from ..utilidades.normalizador import normalizeDecimal 
 
-class Decimal(Numero):
-    def __init__(self, valor: str):
+class Decimal(Number):
+    def __init__(self, value: str):
         # Preprocesar valor (reemplazar comas por puntos)
-        valor = self._normalizar_formato(valor)
-        super().__init__(valor)
+        processedValue = self._normalizeFormat(value)
+        super().__init__(processedValue)
         self.base = 10
-        self.normalizar()
-        self.contar_cifras_significativas()
-        self.determinar_operaciones()
+        self.normalize()
+        self.countSignificantDigits()
+        self.determinePossibleOperations()
     
-    def _normalizar_formato(self, valor: str) -> str:
+    def _normalizeFormat(self, value: str) -> str:
         """Convierte comas en puntos y elimina espacios"""
-        return valor.replace(',', '.').replace(' ', '')
+        return value.replace(',', '.').replace(' ', '')
     
-    def normalizar(self):
+    def normalize(self):
         """Convierte el número a notación científica"""
-        self.valor_normalizado = normalizar_decimal(self.valor_original)
+        self.normalizedValue = normalizeDecimal(self.originalValue)
     
-    def contar_cifras_significativas(self):
+    def countSignificantDigits(self):
         """Calcula la cantidad de cifras significativas según reglas matemáticas"""
-        valor = self.valor_original
+        value = self.originalValue
         
         # Manejar signo
-        if valor.startswith('-') or valor.startswith('+'):
-            valor = valor[1:]
+        if value.startswith('-') or value.startswith('+'):
+            value = value[1:]
         
         # Caso especial: cero
-        if all(c == '0' for c in valor.replace('.', '')):
-            self.cifras_significativas = 1
+        if all(char == '0' for char in value.replace('.', '')):
+            self.significantDigits = 1
             return
         
         # Dividir en parte entera y decimal
-        partes = valor.split('.')
-        parte_entera = partes[0].lstrip('0')
+        parts = value.split('.')
+        integerPart = parts[0].lstrip('0')
         
-        if len(partes) > 1:
-            parte_decimal = partes[1].rstrip('0')
+        if len(parts) > 1:
+            fractionalPart = parts[1].rstrip('0')
         else:
-            parte_decimal = ""
+            fractionalPart = ""
         
         # Contar cifras significativas
-        if parte_entera:
-            self.cifras_significativas = len(parte_entera) + len(parte_decimal)
+        if integerPart:
+            self.significantDigits = len(integerPart) + len(fractionalPart)
         else:
             # Buscar primer dígito no cero en decimal
-            for i, char in enumerate(parte_decimal):
+            for index, char in enumerate(fractionalPart):
                 if char != '0':
-                    self.cifras_significativas = len(parte_decimal) - i
+                    self.significantDigits = len(fractionalPart) - index
                     return
-            self.cifras_significativas = 1
+            self.significantDigits = 1
     
-    def determinar_operaciones(self):
+    def determinePossibleOperations(self):
         """Todas las operaciones son posibles para números decimales"""
-        self.operaciones_posibles = ['+', '-', '*', '/']
+        self.possibleOperations = ['+', '-', '*', '/']
     
     def __str__(self):
-        return (f"{self.valor_original} | Base: {self.base} | "
-                f"Normalizado: {self.valor_normalizado} | "
-                f"Cifras: {self.cifras_significativas} | "
-                f"Operaciones: {''.join(self.operaciones_posibles)}")
+        return (f"{self.originalValue} | Base: {self.base} | "
+                f"Normalizado: {self.normalizedValue} | "
+                f"Cifras: {self.significantDigits} | "
+                f"Operaciones: {''.join(self.possibleOperations)}")

@@ -1,27 +1,30 @@
 from abc import ABC, abstractmethod
 
-class Numero(ABC):
-    def __init__(self, valor):
-        self.valor_original = valor
-        self.valor_normalizado = ""
-        self.cifras_significativas = 0
+class Number(ABC):
+    def __init__(self, value):
+        self.originalValue = value
+        self.normalizedValue = ""
+        self.significantDigits = 0
         self.base = 10
-        self.operaciones_posibles = []
+        self.possibleOperations = []
     
     @abstractmethod
-    def normalizar(self):
+    def normalize(self):
+        """Convierte el número a notación científica"""
         pass
     
     @abstractmethod
-    def contar_cifras_significativas(self):
+    def countSignificantDigits(self):
+        """Calcula la cantidad de cifras significativas"""
         pass
     
     @abstractmethod
-    def determinar_operaciones(self):
+    def determinePossibleOperations(self):
+        """Determina las operaciones posibles para el número"""
         pass
     
     def __str__(self):
-        return (f"{self.valor_original} | Base: {self.base} | "
-                f"Normalizado: {self.valor_normalizado} | "
-                f"Cifras: {self.cifras_significativas} | "
-                f"Operaciones: {''.join(self.operaciones_posibles)}")
+        return (f"{self.originalValue} | Base: {self.base} | "
+                f"Normalizado: {self.normalizedValue} | "
+                f"Cifras: {self.significantDigits} | "
+                f"Operaciones: {''.join(self.possibleOperations)}")

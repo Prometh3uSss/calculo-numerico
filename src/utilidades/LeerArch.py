@@ -1,221 +1,217 @@
 import os
-from datetime import datetime
-import random
 
+class FileManager:
+    __directoryPath = ""
 
-
-class ArchiveUtil:
-    __router = ""
-
-    def __init__(self, router=os.getcwd()):
-        if not router or len(router) == 0:
+    def __init__(self, directoryPath=os.getcwd()):
+        if not directoryPath or len(directoryPath) == 0:
             raise ValueError("Manage-Error: La ruta es vacia")
-        self.utilDirectory(router)
+        self.useDirectory(directoryPath)
 
-    def getRouter(self) -> str:
-        return str(self.__router)
+    def getDirectoryPath(self) -> str:
+        return str(self.__directoryPath)
     
-    def getArchive(self, nameArchive: str):
-        if not nameArchive or len(nameArchive) == 0:
+    def getFile(self, fileName: str):
+        if not fileName or len(fileName) == 0:
             raise ValueError("Manage-Error: El nombre esta Vacio")
         
         try:
-            return open(os.path.join(self.__router, nameArchive), 'rb')
-        except FileNotFoundError as e:
-            print(f"Manage-Error: El archivo '{nameArchive}' no ha sido encontrado en '{self.__router}': {e}")
+            return open(os.path.join(self.__directoryPath, fileName), 'rb')
+        except FileNotFoundError as error:
+            print(f"Manage-Error: El archivo '{fileName}' no ha sido encontrado en '{self.__directoryPath}': {error}")
             return None
-        except IOError as e:
-            print(f"Manage-Error: Error al acceder al archivo '{nameArchive}': {e}")
+        except IOError as error:
+            print(f"Manage-Error: Error al acceder al archivo '{fileName}': {error}")
             return None
 
-    def getDirectoriesList(self) -> list:
+    def listDirectoryContents(self) -> list:
         try:
-            directories = os.listdir(self.__router)
-            if len(directories) > 0:
-                return directories
+            directoryContents = os.listdir(self.__directoryPath)
+            if len(directoryContents) > 0:
+                return directoryContents
             return [] 
         except FileNotFoundError:
-            print(f"Manage-Error: Directorio no existe o no se puede acceder: '{self.__router}'")
+            print(f"Manage-Error: Directorio no existe o no se puede acceder: '{self.__directoryPath}'")
             return []
         except NotADirectoryError:
-            print(f"Manage-Error: La ruta '{self.__router}' no es un directorio")
+            print(f"Manage-Error: La ruta '{self.__directoryPath}' no es un directorio")
             return []
-        except Exception as e:
-            print(f"Manage-Error: Ocurrio un error inesperado al listar el directorio: {e}")
+        except Exception as error:
+            print(f"Manage-Error: Ocurrio un error inesperado al listar el directorio: {error}")
             return []
         
-    def setRouter(self, router: str):
-        if not router or len(router) == 0:
+    def setDirectoryPath(self, directoryPath: str):
+        if not directoryPath or len(directoryPath) == 0:
             raise ValueError("Manage-Error: La ruta es vacia")
-        self.utilDirectory(router)
+        self.useDirectory(directoryPath)
 
-    def utilDirectory(self, router: str):
-        if not os.path.exists(router):
-            raise FileNotFoundError(f"Manage-Error: El directorio '{router}' no existe")
-        if not os.path.isdir(router):
-            raise NotADirectoryError(f"Manage-Error: La ruta '{router}' no es un directorio")
-        self.__router = router
+    def useDirectory(self, directoryPath: str):
+        if not os.path.exists(directoryPath):
+            raise FileNotFoundError(f"Manage-Error: El directorio '{directoryPath}' no existe")
+        if not os.path.isdir(directoryPath):
+            raise NotADirectoryError(f"Manage-Error: La ruta '{directoryPath}' no es un directorio")
+        self.__directoryPath = directoryPath
 
 
-class arregloBidimensional:
+class TwoDimensionalArray:
     def __init__(self):
-        self.filas = {}
-        self.maxColumna = -1
+        self.rows = {}
+        self.maxColumn = -1
 
-    def agregarElemento(self, fila: int, columna: int, valor: str):
-        if fila < 0 or columna < 0:
+    def addElement(self, row: int, column: int, value: str):
+        if row < 0 or column < 0:
             raise ValueError("Las coordenadas de fila y columna deben ser no negativas")
         
-        if fila not in self.filas:
-            self.filas[fila] = {}
-        self.filas[fila][columna] = valor
-        if columna > self.maxColumna:
-            self.maxColumna = columna
+        if row not in self.rows:
+            self.rows[row] = {}
+        self.rows[row][column] = value
+        if column > self.maxColumn:
+            self.maxColumn = column
 
-    def dimensiones(self) -> tuple[int, int]:
-        if not self.filas:
+    def getDimensions(self) -> tuple[int, int]:
+        if not self.rows:
             return (0, 0)
         
-        numFilas = max(self.filas.keys()) + 1
-        numColumnas = self.maxColumna + 1
+        numRows = max(self.rows.keys()) + 1
+        numColumns = self.maxColumn + 1
         
-        return (numFilas, numColumnas)
+        return (numRows, numColumns)
 
-    def obtenerElemento(self, fila: int, columna: int):
-        if fila in self.filas and columna in self.filas[fila]:
-            return self.filas[fila][columna]
+    def getElement(self, row: int, column: int):
+        if row in self.rows and column in self.rows[row]:
+            return self.rows[row][column]
         return None
     
     def toListOfLists(self) -> list[list[str]]:
-        numFilas, numCols = self.dimensiones()
+        numRows, numColumns = self.getDimensions()
         
-        if numFilas == 0:
+        if numRows == 0:
             return []
 
-        matrizLista = [[None for _ in range(numCols)] for _ in range(numFilas)]
+        matrixList = [[None for _ in range(numColumns)] for _ in range(numRows)]
         
-        for rIdx, colsDict in self.filas.items():
-            for cIdx, value in colsDict.items():
-                matrizLista[rIdx][cIdx] = value
+        for rowIndex, columnsDict in self.rows.items():
+            for columnIndex, elementValue in columnsDict.items():
+                matrixList[rowIndex][columnIndex] = elementValue
                 
-        return matrizLista
+        return matrixList
 
 
-class fileHandler(ArchiveUtil):
-    def __init__(self, rutaArchivo: str):
-        directorio = os.path.dirname(rutaArchivo)
-        if not directorio:
-            directorio = os.getcwd()
-        super().__init__(directorio)
+class FileHandler(FileManager):
+    def __init__(self, filePath: str):
+        directory = os.path.dirname(filePath)
+        if not directory:
+            directory = os.getcwd()
+        super().__init__(directory)
         
-        self.nombreArchivo = os.path.basename(rutaArchivo)
-        self.matrizDatos = self.leerArchivo()
+        self.fileName = os.path.basename(filePath)
+        self.dataMatrix = self.readFile()
         
-    def leerArchivo(self) -> arregloBidimensional:
-        matriz = arregloBidimensional()
+    def readFile(self) -> TwoDimensionalArray:
+        matrix = TwoDimensionalArray()
         try:
-            with self.getArchive(self.nombreArchivo) as archivoBin:
+            with self.getFile(self.fileName) as binaryFile:
                
-                for i, lineaBytes in enumerate(archivoBin):
+                for lineIndex, lineBytes in enumerate(binaryFile):
                     try:
-                        linea = lineaBytes.decode('utf-8').strip()
+                        lineContent = lineBytes.decode('utf-8').strip()
                     except UnicodeDecodeError:
-                        print(f"Advertencia: No se pudo decodificar la linea {i+1} del archivo '{self.nombreArchivo}'. Se omitira")
+                        print(f"Advertencia: No se pudo decodificar la linea {lineIndex+1} del archivo '{self.fileName}'. Se omitira")
                         continue 
 
-                    if not linea:
+                    if not lineContent:
                         continue
 
-                    valores = linea.split('#')
-                    for j, valorStr in enumerate(valores):
-                        valorLimpio = valorStr.strip()
+                    values = lineContent.split('#')
+                    for columnIndex, rawValue in enumerate(values):
+                        cleanValue = rawValue.strip()
 
-                        if valorLimpio: 
-                            if self.esOctal(valorLimpio):
-                                matriz.agregarElemento(i, j, f"Ocho: {valorLimpio}")
-                            elif not self.esReconocido(valorLimpio):
-                                matriz.agregarElemento(i, j, f"{valorLimpio}")
+                        if cleanValue: 
+                            if self.isOctal(cleanValue):
+                                matrix.addElement(lineIndex, columnIndex, f"Ocho: {cleanValue}")
+                            elif not self.isRecognized(cleanValue):
+                                matrix.addElement(lineIndex, columnIndex, f"{cleanValue}")
                             else:
-                                matriz.agregarElemento(i, j, valorLimpio)
+                                matrix.addElement(lineIndex, columnIndex, cleanValue)
 
-        except Exception as e:
-            print(f"Error en lectura o procesamiento del archivo '{self.nombreArchivo}': {e}")
-            return arregloBidimensional()
-        return matriz
+        except Exception as error:
+            print(f"Error en lectura o procesamiento del archivo '{self.fileName}': {error}")
+            return TwoDimensionalArray()
+        return matrix
     
-    def esOctal(self, valor: str) -> bool:
-        if not isinstance(valor, str) or not valor:
+    def isOctal(self, value: str) -> bool:
+        if not isinstance(value, str) or not value:
             return False
         
-        if '.' in valor:
+        if '.' in value:
             return False
 
-        esSoloOctalDigitos = all(c in '01234567' for c in valor)
+        isOctalDigits = all(char in '01234567' for char in value)
         
-        if esSoloOctalDigitos:
-            if all(c in '01' for c in valor):
+        if isOctalDigits:
+            if all(char in '01' for char in value):
                 return False
             
             try:
-                if len(valor) > 1 and valor.startswith('0'):
-                    int(valor, 8)
+                if len(value) > 1 and value.startswith('0'):
+                    int(value, 8)
                     return True
-                elif len(valor) == 1 and valor == '0':
+                elif len(value) == 1 and value == '0':
                     return False
             except ValueError:
                 pass
         return False
         
-    def esReconocido(self, valor: str) -> bool:
-        def esBinarioUtil(val: str) -> bool:
-            return all(c in '01.' for c in val)
+    def isRecognized(self, value: str) -> bool:
+        def isBinary(valueStr: str) -> bool:
+            return all(char in '01.' for char in valueStr)
 
-        def esDecimalUtil(val: str) -> bool:
-            partes = val.split('.')
-            if len(partes) > 2:
+        def isDecimal(valueStr: str) -> bool:
+            parts = valueStr.split('.')
+            if len(parts) > 2:
                 return False
-            return all(part.isdigit() for part in partes)
+            return all(part.isdigit() for part in parts)
 
-        def esHexadecimalUtil(val: str) -> bool:
-            return all(c in '0123456789abcdefABCDEF.' for c in val)
+        def isHexadecimal(valueStr: str) -> bool:
+            return all(char in '0123456789abcdefABCDEF.' for char in valueStr)
             
-        valorLower = valor.lower()
-        return esBinarioUtil(valorLower) or esDecimalUtil(valorLower) or esHexadecimalUtil(valorLower)
+        valueLower = value.lower()
+        return isBinary(valueLower) or isDecimal(valueLower) or isHexadecimal(valueLower)
 
-    def get_dimensiones(self) -> tuple[int, int]:
-        return self.matrizDatos.dimensiones()
+    def getDimensions(self) -> tuple[int, int]:
+        return self.dataMatrix.getDimensions()
     
-    def get_datos(self) -> arregloBidimensional:
-        return self.matrizDatos
+    def getData(self) -> TwoDimensionalArray:
+        return self.dataMatrix
 
 
-class lectorArchivosBin:
-    def __init__(self, rutaCarpetaArchivosBin: str):
-        self.rutaCarpetaArchivosBin = rutaCarpetaArchivosBin
+class BinaryFilesReader:
+    def __init__(self, binaryFilesFolderPath: str):
+        self.binaryFilesFolderPath = binaryFilesFolderPath
         
-        if not os.path.isdir(self.rutaCarpetaArchivosBin):
-            raise FileNotFoundError(f"La carpeta de archivos binarios no existe: {rutaCarpetaArchivosBin}")
+        if not os.path.isdir(self.binaryFilesFolderPath):
+            raise FileNotFoundError(f"La carpeta de archivos binarios no existe: {binaryFilesFolderPath}")
 
-    def obtenerArchivosParaProcesar(self) -> list[tuple[str, arregloBidimensional]]:
-        archiveUtilForListing = ArchiveUtil(self.rutaCarpetaArchivosBin)
-        nombresArchivos = archiveUtilForListing.getDirectoriesList()
+    def getFilesToProcess(self) -> list[tuple[str, TwoDimensionalArray]]:
+        fileManager = FileManager(self.binaryFilesFolderPath)
+        fileNames = fileManager.listDirectoryContents()
         
-        archivosProcesables = []
-        if not nombresArchivos:
-            print(f"No se encontraron archivos en la carpeta: {self.rutaCarpetaArchivosBin}")
+        processableFiles = []
+        if not fileNames:
+            print(f"No se encontraron archivos en la carpeta: {self.binaryFilesFolderPath}")
             return []
             
-        for nombreArchivo in nombresArchivos:
-            if nombreArchivo.endswith('.bin'):
-                rutaCompletaArchivoBin = os.path.join(self.rutaCarpetaArchivosBin, nombreArchivo)
-                fileHandler = fileHandler(rutaCompletaArchivoBin)
-                matrizDatos = fileHandler.getDatos()
+        for fileName in fileNames:
+            if fileName.endswith('.bin'):
+                fullBinaryFilePath = os.path.join(self.binaryFilesFolderPath, fileName)
+                fileHandler = FileHandler(fullBinaryFilePath)
+                dataMatrix = fileHandler.getData()
                 
-                if matrizDatos.dimensiones() == (0, 0):
-                    print(f"Advertencia: El archivo '{fileHandler.nombreArchivo}' esta vacio o contiene datos invalidos, se saltara")
+                if dataMatrix.getDimensions() == (0, 0):
+                    print(f"Advertencia: El archivo '{fileHandler.fileName}' esta vacio o contiene datos invalidos, se saltara")
                 else:
-                    archivosProcesables.append((fileHandler.nombreArchivo, matrizDatos))
+                    processableFiles.append((fileHandler.fileName, dataMatrix))
             else:
-                print(f"Saltando archivo no .bin: {nombreArchivo}")
+                print(f"Saltando archivo no .bin: {fileName}")
         
-        return archivosProcesables
+        return processableFiles

@@ -1,21 +1,21 @@
 import re
 from datetime import datetime
 
-class ValidadorFormato:
+class FormatValidator:
     @staticmethod
-    def validar_nombre_archivo(nombre):
+    def validateFileName(fileName):
         # Formato: nombre_Fecha_Serial.txt
-        patron = r"^(.+)_(\d{8})_(\d+)\.txt$"
-        coincidencia = re.match(patron, nombre)
+        pattern = r"^(.+)_(\d{8})_(\d+)\.txt$"
+        match = re.match(pattern, fileName)
         
-        if not coincidencia:
+        if not match:
             return False
         
         try:
-            fecha_str = coincidencia.group(2)
-            datetime.strptime(fecha_str, "%Y%m%d")
+            dateStr = match.group(2)
+            datetime.strptime(dateStr, "%Y%m%d")
             # Validar que el serial sea numérico
-            int(coincidencia.group(3))
+            int(match.group(3))
             return True
         except (ValueError, TypeError):
             return False

@@ -1,39 +1,43 @@
 from numero import Numero
 
 class Hexadecimal(Numero):
-    def validar(self):
-        if not all(c in '0123456789abcdefABCDEF.' for c in self.valor):
-            raise ValueError(f"Valor '{self.valor}' no es hexadecimal valido")
-        self.sistema = "Hexadecimal"
+    def validate(self):
+        """Valida que el valor sea hexadecimal"""
+        if not all(char in '0123456789abcdefABCDEF.' for char in self.value):
+            raise ValueError(f"Valor '{self.value}' no es hexadecimal valido")
+        self.system = "Hexadecimal"
     
-    def calcularCifrasSignificativas(self):
-        partes = self.valor.split('.')
-        if len(partes) == 1:
-            self.cifrasSignificativas = len(partes[0].lstrip('0'))
+    def calculateSignificantDigits(self):
+        """Calcula cifras significativas"""
+        parts = self.value.split('.')
+        if len(parts) == 1:
+            self.significantDigits = len(parts[0].lstrip('0'))
         else:
-            self.cifrasSignificativas = len(partes[0].lstrip('0')) + len(partes[1].rstrip('0'))
+            self.significantDigits = len(parts[0].lstrip('0')) + len(parts[1].rstrip('0'))
     
-    def aDecimal(self):
-        partes = self.valor.split('.')
-        entero = int(partes[0], 16) if partes[0] else 0
-        decimal = 0
-        if len(partes) > 1 and partes[1]:
-            decimal = sum(int(c, 16) * 16**(-i-1) for i, c in enumerate(partes[1]))
-        return entero + decimal
+    def toDecimal(self):
+        """Convierte a decimal"""
+        parts = self.value.split('.')
+        integerPart = int(parts[0], 16) if parts[0] else 0
+        fractionalPart = 0
+        if len(parts) > 1 and parts[1]:
+            fractionalPart = sum(int(char, 16) * 16**(-index-1) for index, char in enumerate(parts[1]))
+        return integerPart + fractionalPart
     
-    def formaNormalizada(self):
-        decimal = self.aDecimal()
-        if decimal == 0:
+    def getNormalizedForm(self):
+        """Devuelve forma normalizada"""
+        decimalValue = self.toDecimal()
+        if decimalValue == 0:
             return "0"
         
-        exponente = 0
-        num = abs(decimal)
+        exponent = 0
+        num = abs(decimalValue)
         while num >= 16:
             num /= 16
-            exponente += 1
+            exponent += 1
         while num < 1:
             num *= 16
-            exponente -= 1
+            exponent -= 1
         
-        signo = "-" if decimal < 0 else ""
-        return f"{signo}{num:.4f} × 16^{exponente}"
+        sign = "-" if decimalValue < 0 else ""
+        return f"{sign}{num:.4f} × 16^{exponent}"
