@@ -1,199 +1,233 @@
-from ..estructuras.listaEnlazada import ListaEnlazada
-from ..errores.tiposErrores import FormatoNumeroInvalidoError, NombreArchivoError
-from .validadorFormato import ValidadorFormato
-from ..numeros.binario import Binario
-from ..numeros.decimal import Decimal
-from ..numeros.hexadecimal import Hexadecimal
-from ..estructuras.cola import Cola
-import os
+from estructuras.LinkedList import LinkedList
+from numeros.Binary import Binary
+from numeros.Decimal import Decimal
+from numeros.Hexadecimal import Hexadecimal
+from utilidades.FormatValidator import FormatValidator
+from errores.CustomExceptions import InvalidNumberFormatException, FileNameFormatException
 
 class FileReader:
     def __init__(self):
-        # ListaEnlazada de filas (cada fila es una ListaEnlazada de números)
-        self.dataList = ListaEnlazada()
-        # Registro de errores encontrados
-        self.errorList = ListaEnlazada()
-    
-    def processFile(self, filePath: str) -> ListaEnlazada:
         """
-        Procesa un archivo de texto con formato específico y devuelve los datos estructurados
+        Inicializa el lector de archivos con estructuras de datos propias
+        """
+        self.data = LinkedList()
+        self.errorList = LinkedList()
+        self.rowCount = 0
+        self.columnCount = 0
+    
+    def processFile(self, filePath: str) -> LinkedList:
+        """
+        Procesa un archivo de texto y devuelve los datos estructurados
         
         Args:
-            filePath: Ruta completa al archivo a procesar
+            filePath: Ruta completa al archivo
             
         Returns:
-            ListaEnlazada con los datos procesados (filas de números)
+            LinkedList con los datos procesados
             
         Raises:
-            FileNotFoundError: Si el archivo no existe
-            IOError: Si hay problemas de lectura
-            NombreArchivoError: Si el nombre no cumple con el formato
+            FileNotFoundException: Si el archivo no existe
+            IOException: Si hay errores de lectura
+            FileNameFormatException: Si el nombre no cumple el formato
         """
-        # Extraer el nombre del archivo de la ruta
-        fileName = os.path.basename(filePath)
+        # Obtener nombre del archivo de la ruta
+        fileName = self.extractFileName(filePath)
         
-        # Validar el nombre del archivo
-        if not ValidadorFormato.validar_nombre_archivo(fileName):
-            raise NombreArchivoError(f"El nombre del archivo '{fileName}' no cumple con el formato requerido")
+        # Validar formato del nombre
+        if not FormatValidator.validateFileNameFormat(fileName):
+            raise FileNameFormatException(f"Invalid file name format: {fileName}")
         
-        # Intentar abrir y leer el archivo
-        try:
-            # Usaremos una cola para leer las líneas
-            linesQueue = Cola()
-            
-            # Abrimos el archivo y leemos línea por línea
-            with open(filePath, 'r') as file:
-                # Leemos todas las líneas y las encolamos
-                for lineContent in file:
-                    linesQueue.encolar(lineContent.strip())
-            
-            # Procesamos cada línea en el orden original
-            currentLineNumber = 1
-            while not linesQueue.esta_vacia():
-                lineContent = linesQueue.desencolar()
-                processedRow = self._processLine(lineContent, currentLineNumber)
-                
-                # Solo agregar filas con datos válidos
-                if processedRow.longitud > 0:
-                    self.dataList.agregar(processedRow)
-                
-                currentLineNumber += 1
+        # Leer archivo a cola de líneas
+        lineQueue = self.readFileToQueue(filePath)
         
-        except FileNotFoundError:
-            raise FileNotFoundError(f"El archivo {filePath} no existe")
-        except IOError as e:
-            raise IOError(f"Error al leer el archivo {filePath}: {str(e)}")
+        # Procesar todas las líneas
+        self.processLines(lineQueue)
         
-        return self.dataList
+        return self.data
     
-    def _processLine(self, lineContent: str, lineNumber: int) -> ListaEnlazada:
+    def extractFileName(self, path: str) -> str:
         """
-        Procesa una línea individual del archivo
+        Extrae el nombre del archivo de una ruta completa
         
         Args:
-            lineContent: Cadena con los datos de la línea
+            path: Ruta completa al archivo
+            
+        Returns:
+            Nombre del archivo con extensión
+        """
+        # Implementación con estructuras propias
+        pathParts = LinkedList()
+        currentPart = ""
+        
+        for char in path:
+            if char in ['/', '\\']:
+                if currentPart:
+                    pathParts.add(currentPart)
+                    currentPart = ""
+            else:
+                currentPart += char
+        
+        if currentPart:
+            pathParts.add(currentPart)
+        
+        return pathParts.getLast() if pathParts.size() > 0 else ""
+    
+    def readFileToQueue(self, filePath: str) -> LinkedList:
+        """
+        Lee el archivo y devuelve sus líneas en una cola
+        
+        Args:
+            filePath: Ruta al archivo
+            
+        Returns:
+            Cola de líneas del archivo
+        """
+        lineQueue = LinkedList()
+        
+        try:
+            # Usar administrador de contexto para garantizar cierre
+            with open(filePath, 'r', encoding='utf-8') as file:
+                # Leer línea por línea usando estructuras propias
+                while True:
+                    lineContent = file.readline()
+                    if not lineContent:
+                        break
+                    cleanedLine = lineContent.strip()
+                    if cleanedLine:
+                        lineQueue.add(cleanedLine)
+        except FileNotFoundError:
+            raise FileNotFoundException(f"File not found: {filePath}")
+        except IOError as ioError:
+            raise IOException(f"Read error: {str(ioError)}")
+        
+        return lineQueue
+    
+    def processLines(self, lineQueue: LinkedList):
+        """
+        Procesa todas las líneas de la cola
+        
+        Args:
+            lineQueue: Cola de líneas a procesar
+        """
+        currentLine = lineQueue.getFirst()
+        lineNumber = 1
+        
+        while currentLine:
+            row = self.processLine(currentLine.data, lineNumber)
+            
+            # Actualizar contadores de dimensiones
+            if row.size() > self.columnCount:
+                self.columnCount = row.size()
+            if row.size() > 0:
+                self.data.add(row)
+                self.rowCount += 1
+            
+            currentLine = currentLine.next
+            lineNumber += 1
+    
+    def processLine(self, lineContent: str, lineNumber: int) -> LinkedList:
+        """
+        Procesa una línea individual y devuelve sus datos
+        
+        Args:
+            lineContent: Contenido de la línea
             lineNumber: Número de línea para reporte de errores
             
         Returns:
-            ListaEnlazada con los números procesados de la línea
+            Fila de datos procesados
         """
-        rowList = ListaEnlazada()
+        row = LinkedList()
+        fieldQueue = self.splitFields(lineContent)
+        currentField = fieldQueue.getFirst()
         
-        # Usamos una cola para procesar los campos
-        fieldsQueue = Cola()
-        currentField = ""
+        while currentField:
+            data = currentField.data
+            if data:
+                try:
+                    number = self.createNumber(data)
+                    row.add(number)
+                except InvalidNumberFormatException as formatError:
+                    self.registerError(lineNumber, data, str(formatError))
+            currentField = currentField.next
         
-        # Procesar cada carácter para dividir por #
-        for character in lineContent:
-            if character == '#':
-                fieldsQueue.encolar(currentField.strip())
-                currentField = ""
-            else:
-                currentField += character
-        
-        # Agregar el último campo
-        if currentField:
-            fieldsQueue.encolar(currentField.strip())
-        
-        # Procesar cada campo
-        while not fieldsQueue.esta_vacia():
-            fieldData = fieldsQueue.desencolar()
-            if not fieldData:  # Ignorar campos vacíos
-                continue
-                
-            try:
-                # Determinar el tipo de dato
-                numberObject = self._createNumber(fieldData)
-                rowList.agregar(numberObject)
-            except FormatoNumeroInvalidoError as e:
-                # Registrar el error pero continuar procesando
-                errorMessage = f"Línea {lineNumber}, dato '{fieldData}': {str(e)}"
-                self.errorList.agregar(errorMessage)
-        
-        return rowList
+        return row
     
-    def _createNumber(self, valueStr: str):
+    def splitFields(self, lineContent: str) -> LinkedList:
         """
-        Crea un objeto numérico según el formato del valor
+        Divide una línea en campos usando '#' como separador
         
         Args:
-            valueStr: Cadena con el valor numérico
+            lineContent: Contenido de la línea
             
         Returns:
-            Instancia de Binario, Decimal o Hexadecimal
+            Cola de campos
+        """
+        fieldQueue = LinkedList()
+        currentField = ""
+        
+        for char in lineContent:
+            if char == '#':
+                if currentField:
+                    fieldQueue.add(currentField.strip())
+                    currentField = ""
+            else:
+                currentField += char
+        
+        if currentField:
+            fieldQueue.add(currentField.strip())
+        
+        return fieldQueue
+    
+    def createNumber(self, value: str):
+        """
+        Crea un objeto numérico según el tipo de dato
+        
+        Args:
+            value: Valor numérico en cadena
+            
+        Returns:
+            Instancia de Binary, Decimal o Hexadecimal
             
         Raises:
-            FormatoNumeroInvalidoError: Si el formato no es reconocido
+            InvalidNumberFormatException: Si el formato no es válido
         """
-        # Normalizar comas a puntos
-        normalizedValue = valueStr.replace(',', '.')
+        normalizedValue = value.replace(',', '.').lower()
         
-        # Determinar el tipo de número
-        if self._isBinary(normalizedValue):
-            return Binario(normalizedValue)
-        elif self._isDecimal(normalizedValue):
+        if FormatValidator.isValidBinary(normalizedValue):
+            return Binary(normalizedValue)
+        elif FormatValidator.isValidDecimal(normalizedValue):
             return Decimal(normalizedValue)
-        elif self._isHexadecimal(normalizedValue):
+        elif FormatValidator.isValidHexadecimal(normalizedValue):
             return Hexadecimal(normalizedValue)
         else:
-            raise FormatoNumeroInvalidoError(f"Formato numérico no reconocido: {valueStr}")
+            raise InvalidNumberFormatException("Unrecognized number format")
     
-    @staticmethod
-    def _isBinary(valueStr: str) -> bool:
-        """Verifica si el valor es un número binario válido"""
-        # Debe contener solo 0, 1 y un solo punto decimal
-        if any(char not in '01.' for char in valueStr):
-            return False
+    def registerError(self, lineNumber: int, data: str, message: str):
+        """
+        Registra un error en el procesamiento
         
-        # Solo puede haber un punto decimal
-        if valueStr.count('.') > 1:
-            return False
-            
-        # Caso especial: solo punto decimal no es válido
-        if valueStr == '.':
-            return False
-            
-        return True
+        Args:
+            lineNumber: Número de línea donde ocurrió
+            data: Dato problemático
+            message: Mensaje de error
+        """
+        errorMessage = f"Line {lineNumber}, data '{data}': {message}"
+        self.errorList.add(errorMessage)
     
-    @staticmethod
-    def _isDecimal(valueStr: str) -> bool:
-        """Verifica si el valor es un número decimal válido"""
-        # Debe contener solo dígitos y un punto decimal
-        parts = valueStr.split('.')
+    def getDimensions(self) -> tuple:
+        """
+        Devuelve las dimensiones del conjunto de datos
         
-        # Solo puede haber un punto decimal
-        if len(parts) > 2:
-            return False
-            
-        # Todas las partes deben ser dígitos
-        for part in parts:
-            if not part.isdigit() and part != '':
-                return False
-                
-        # Caso especial: solo punto decimal no es válido
-        if valueStr == '.':
-            return False
-            
-        return True
+        Returns:
+            Tupla (filas, columnas)
+        """
+        return (self.rowCount, self.columnCount)
     
-    @staticmethod
-    def _isHexadecimal(valueStr: str) -> bool:
-        """Verifica si el valor es un número hexadecimal válido"""
-        # Debe contener solo dígitos hex, letras A-F y punto decimal
-        validChars = "0123456789abcdefABCDEF."
-        if any(char not in validChars for char in valueStr):
-            return False
+    def getErrors(self) -> LinkedList:
+        """
+        Devuelve la lista de errores encontrados
         
-        # Solo puede haber un punto decimal
-        if valueStr.count('.') > 1:
-            return False
-            
-        # Caso especial: solo punto decimal no es válido
-        if valueStr == '.':
-            return False
-            
-        return True
-
-    def getErrors(self) -> ListaEnlazada:
-        """Devuelve la lista de errores encontrados durante el procesamiento"""
+        Returns:
+            Lista enlazada de mensajes de error
+        """
         return self.errorList
