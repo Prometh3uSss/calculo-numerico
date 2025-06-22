@@ -1,30 +1,31 @@
-class calculadoraErrores:
+class CalculadoraErrores:
     @staticmethod
-    def errorAbsoluto(valorReal, valorAproximado):
-        return abs(valorReal - valorAproximado)
+    def error_absoluto(real, aproximado):
+        return abs(real - aproximado)
     
     @staticmethod
-    def errorRelativo(valorReal, valorAproximado):
-        if valorReal == 0:
-            return float('inf') if valorAproximado != 0 else 0
-        return abs(valorReal - valorAproximado) / abs(valorReal)
+    def error_relativo(real, aproximado):
+        if real == 0:
+            return float('inf') if aproximado != 0 else 0
+        return abs(real - aproximado) / abs(real)
     
     @staticmethod
-    def errorRedondeo(valorReal, cifrasSignificativas):
-        return 0.5 * 10**(-cifrasSignificativas)
+    def error_redondeo(valor, cifras_significativas):
+        return 0.5 * 10 ** (-cifras_significativas)
     
     @staticmethod
-    def errorTruncamiento(valorReal, cifrasSignificativas):
-        return 10**(-cifrasSignificativas)
+    def error_truncamiento(valor, cifras_significativas):
+        return 10 ** (-cifras_significativas)
     
     @staticmethod
-    def errorPropagacionSuma(errors):
-        return sum(errors)
+    def error_propagacion_suma(*errores):
+        return sum(errores)
     
     @staticmethod
-    def errorPropagacionProducto(valores, errors):
+    def error_propagacion_producto(valores, errores):
         total = 0
         for i in range(len(valores)):
-            termino = errors[i] / abs(valores[i]) if valores[i] != 0 else float('inf')
-            total += termino**2
-        return abs(valores[0] * valores[1]) * total**0.5
+            if valores[i] == 0:
+                return float('inf')
+            total += (errores[i] / abs(valores[i])) ** 2
+        return abs(valores[0] * valores[1]) * total ** 0.5
