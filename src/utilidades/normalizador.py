@@ -8,7 +8,7 @@ def normalizarNumero(valor, sistema):
     if sistema == 'Binario':
         return normalizarBinario(valor)
     elif sistema == 'Decimal':
-        return normalizarDecimal(valor)
+        return normalizar_decimal(valor)
     elif sistema == 'Hexadecimal':
         return normalizarHexadecimal(valor)
     else:
@@ -45,29 +45,58 @@ def normalizarBinario(valor):
         mantisa = mantisa.rstrip('0').rstrip('.')
         return mantisa, exponente
 
-def normalizarDecimal(valor):
-    valor = valor.replace(',', '.')
-    try:
-        num = float(valor)
-    except ValueError:
-        raise FormatoNumeroInvalidoError(f"Valor '{valor}' no es decimal valido")
+def normalizar_decimal(valor: str) -> str:
+    """Convierte un número decimal a notación científica"""
+    # Manejar signo
+    signo = ''
+    if valor.startswith('-'):
+        signo = '-'
+        valor = valor[1:]
+    elif valor.startswith('+'):
+        valor = valor[1:]
     
-    if num == 0:
-        return '0', 0
+    # Caso especial: cero
+    if all(c in '0.,' for c in valor):
+        return "0"
+    
+    # Dividir en parte entera y decimal
+    partes = valor.replace(',', '.').split('.')
+    parte_entera = partes[0].lstrip('0') or '0'
+    
+    if len(partes) > 1:
+        parte_decimal = partes[1]
+    else:
+        parte_decimal = ""
+    
+    # Combinar todos los dígitos
+    digitos = parte_entera + parte_decimal
+    digitos = digitos.lstrip('0')
+    
+    # Encontrar el primer dígito significativo
+    if not digitos:
+        return "0"
     
     exponente = 0
-    abs_num = abs(num)
     
-    if abs_num >= 1:
-        while abs_num >= 10:
-            abs_num /= 10
-            exponente += 1
+    if parte_entera != '0':
+        # Caso con dígitos en parte entera
+        exponente = len(parte_entera) - 1
+        mantisa = digitos[0] + '.' + digitos[1:]
     else:
-        while abs_num < 1:
-            abs_num *= 10
-            exponente -= 1
+        # Caso con ceros en parte entera
+        for i, d in enumerate(parte_decimal):
+            if d != '0':
+                exponente = -(i + 1)
+                mantisa = d + '.' + parte_decimal[i+1:]
+                break
+        else:
+            mantisa = '0'
     
-    return f"{abs_num:.5f}".rstrip('0').rstrip('.'), exponente
+    # Eliminar ceros no significativos
+    if '.' in mantisa:
+        mantisa = mantisa.rstrip('0').rstrip('.')
+    
+    return f"{signo}{mantisa} × 10^{exponente}"
 
 def normalizarHexadecimal(valor):
     partes = valor.split('.')
