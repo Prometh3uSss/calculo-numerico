@@ -1,59 +1,27 @@
 from abc import ABC, abstractmethod
-from utilidades.validadores import validarFormatoNumero
 
 class Numero(ABC):
-    def _init_(self, valor):
-        self.valor = valor
-        self.sistema = ""
-        self.cifrasSignificativas = 0
-        self.mantisa = ""
-        self.exponente = 0
-        
-        
-        validarFormatoNumero(valor, self.sistema)
-        
-        self.validar()
-        self.calcularCifrasSignificativas()
-        self.normalizar()
-    
-    @property
-    def valor(self):
-        return self.valor
-    
-    @property
-    def sistema(self):
-        return self.sistema
-    
-    @property
-    def cifrasSignificativas(self):
-        return self.cifrasSignificativas
-    
-    @property
-    def mantisa(self):
-        return self.mantisa
-    
-    @property
-    def exponente(self):
-        return self.exponente
-    
-    @abstractmethod
-    def validar(self):
-        pass
-    
-    @abstractmethod
-    def calcularCifrasSignificativas(self):
-        pass
+    def __init__(self, valor):
+        self.valor_original = valor
+        self.valor_normalizado = ""
+        self.cifras_significativas = 0
+        self.base = 10
+        self.operaciones_posibles = []
     
     @abstractmethod
     def normalizar(self):
         pass
     
     @abstractmethod
-    def aDecimal(self):
+    def contar_cifras_significativas(self):
         pass
     
-    def formaNormalizada(self):
-        return f"{self.mantisa} × {self.sistema[0].lower()}^{self.exponente}"
+    @abstractmethod
+    def determinar_operaciones(self):
+        pass
     
-    def operacionesPosibles(self):
-        return ["Suma", "Resta", "Multiplicacion", "Division"]
+    def __str__(self):
+        return (f"{self.valor_original} | Base: {self.base} | "
+                f"Normalizado: {self.valor_normalizado} | "
+                f"Cifras: {self.cifras_significativas} | "
+                f"Operaciones: {''.join(self.operaciones_posibles)}")
