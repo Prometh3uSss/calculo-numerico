@@ -1,6 +1,6 @@
-from ..estructuras.lista_enlazada import ListaEnlazada
-from ..errores.tipos_errores import FormatoNumeroInvalidoError, NombreArchivoError
-from .validador_formato import ValidadorFormato
+from ..estructuras.listaEnlazada import ListaEnlazada
+from ..errores.tiposErrores import FormatoNumeroInvalidoError, NombreArchivoError
+from .validadorFormato import ValidadorFormato
 from ..numeros.binario import Binario
 from ..numeros.decimal import Decimal
 from ..numeros.hexadecimal import Hexadecimal
