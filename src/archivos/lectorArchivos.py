@@ -1,5 +1,10 @@
+"""
+Lector de archivos con validación de formato completo
+Implementa procesamiento de datos con estructuras propias
+"""
+
 from estructuras.listaEnlazada import LinkedList
-from numeros.binario import Binary
+from numeros.binario import Binario
 from numeros.decimal import Decimal
 from numeros.hexadecimal import Hexadecimal
 from utilidades.validadorFormato import FormatValidator
@@ -31,10 +36,11 @@ class FileReader:
         Raises:
             FileNameFormatError: Si el nombre no cumple formato
             FileNotFoundException: Si el archivo no existe
-            IOException: Errores de lectura
+            IOException: Si hay errores de lectura
         """
         fileName = self.extractFileNameFromPath(filePath)
         
+        # Validar formato del nombre usando FormatValidator
         if not FormatValidator.validateFileName(fileName):
             raise FileNameFormatError(f"Formato inválido: {fileName}")
         
@@ -51,91 +57,76 @@ class FileReader:
         for char in path:
             if char in ['/', '\\']:
                 if currentSegment:
-                    pathParts.append(currentSegment)
+                    pathParts.addElementAtEnd(currentSegment)
                     currentSegment = ""
             else:
                 currentSegment += char
         
         if currentSegment:
-            pathParts.append(currentSegment)
+            pathParts.addElementAtEnd(currentSegment)
         
-        return pathParts.get(pathParts.length - 1) if pathParts.length > 0 else ""
+        return pathParts.getElementAtIndex(pathParts.getListLength() - 1) if pathParts.getListLength() > 0 else ""
     
     def readFileLines(self, filePath: str) -> LinkedList:
         """Lee archivo usando solo estructuras propias"""
         linesQueue = LinkedList()
-        fileBuffer = self.readFileBytes(filePath)
-        currentLine = ""
         
-        for byte in fileBuffer:
-            char = chr(byte)
-            if char == '\n':
-                linesQueue.append(currentLine.strip())
+        try:
+            with open(filePath, 'r', encoding='utf-8') as file:
                 currentLine = ""
-            else:
-                currentLine += char
-        
-        if currentLine:
-            linesQueue.append(currentLine.strip())
+                while True:
+                    char = file.read(1)
+                    if not char:
+                        break
+                    if char == '\n':
+                        linesQueue.addElementAtEnd(currentLine.strip())
+                        currentLine = ""
+                    else:
+                        currentLine += char
+                
+                if currentLine:
+                    linesQueue.addElementAtEnd(currentLine.strip())
+                    
+        except FileNotFoundError:
+            raise FileNotFoundException(f"Archivo no encontrado: {filePath}")
+        except IOError as ioError:
+            raise IOException(f"Error de lectura: {str(ioError)}")
             
         return linesQueue
     
-    def readFileBytes(self, filePath: str) -> LinkedList:
-        """Lee bytes del archivo usando estructura propia"""
-        byteList = LinkedList()
-        
-        try:
-            # Simulación de lectura sin open() nativo
-            # (Implementación real dependería de OS)
-            for byte in self.os_read_file_simulation(filePath):
-                byteList.append(byte)
-        except FileNotFoundError:
-            raise FileNotFoundException(f"Archivo no encontrado: {filePath}")
-        except IOError as ioErr:
-            raise IOException(f"Error de lectura: {str(ioErr)}")
-            
-        return byteList
-    
-    def os_read_file_simulation(self, filePath):
-        """Simula lectura de archivo (implementación real sería con llamadas a sistema)"""
-        # EN PRODUCCIÓN: Reemplazar con llamadas a sistema usando ctypes/OS
-        with open(filePath, 'rb') as f:
-            while byte := f.read(1):
-                yield ord(byte)
-    
     def processAllLines(self, linesQueue: LinkedList):
         """Procesa todas las líneas del archivo"""
-        currentLineNode = linesQueue.head
+        currentLineNode = linesQueue.headNode
         lineCounter = 1
         
         while currentLineNode:
-            processedRow = self.processSingleLine(currentLineNode.data, lineCounter)
+            processedRow = self.processSingleLine(currentLineNode.elementData, lineCounter)
             
-            if processedRow.length > self.totalColumns:
-                self.totalColumns = processedRow.length
+            if processedRow.getListLength() > self.totalColumns:
+                self.totalColumns = processedRow.getListLength()
             
-            if processedRow.length > 0:
-                self.processedData.append(processedRow)
+            if processedRow.getListLength() > 0:
+                self.processedData.addElementAtEnd(processedRow)
                 self.totalRows += 1
             
-            currentLineNode = currentLineNode.next
+            currentLineNode = currentLineNode.nextNode
             lineCounter += 1
     
     def processSingleLine(self, lineContent: str, lineNumber: int) -> LinkedList:
         """Procesa una línea individual"""
         rowData = LinkedList()
         fields = self.splitFields(lineContent)
-        currentFieldNode = fields.head
+        currentFieldNode = fields.headNode
         
         while currentFieldNode:
-            rawValue = currentFieldNode.data
+            rawValue = currentFieldNode.elementData
             if rawValue:
                 try:
                     numberObj = self.createNumberObject(rawValue)
-                    rowData.append(numberObj)
-                except InvalidNumberFormatError as formatErr:
-                    self.logError(lineNumber, rawValue, str(formatErr))
-            currentFieldNode = currentFieldNode.next
+                    rowData.addElementAtEnd(numberObj)
+                except InvalidNumberFormatError as formatError:
+                    self.logError(lineNumber, rawValue, str(formatError))
+            currentFieldNode = currentFieldNode.nextNode
         
         return rowData
     
@@ -147,25 +138,31 @@ class FileReader:
         for char in lineContent:
             if char == '#':
                 if currentField:
-                    fieldList.append(currentField.strip())
+                    fieldList.addElementAtEnd(currentField.strip())
                     currentField = ""
             else:
                 currentField += char
         
         if currentField:
-            fieldList.append(currentField.strip())
+            fieldList.addElementAtEnd(currentField.strip())
             
         return fieldList
     
     def createNumberObject(self, rawValue: str):
-        """Crea objeto numérico según el tipo detectado"""
+        """
+        Crea objeto numérico según el tipo detectado
+        Usa FormatValidator para determinar el sistema numérico
+        """
         normalizedValue = rawValue.replace(',', '.').lower()
         
-        if FormatValidator.isValidBinary(normalizedValue):
-            return Binary(normalizedValue)
-        elif FormatValidator.isValidDecimal(normalizedValue):
+        # Usar FormatValidator para determinar el sistema numérico
+        numberSystem = FormatValidator.determineNumberSystem(normalizedValue)
+        
+        if numberSystem == "Binario":
+            return Binario(normalizedValue)
+        elif numberSystem == "Decimal":
             return Decimal(normalizedValue)
-        elif FormatValidator.isValidHexadecimal(normalizedValue):
+        elif numberSystem == "Hexadecimal":
             return Hexadecimal(normalizedValue)
         else:
             raise InvalidNumberFormatError("Formato numérico desconocido")
@@ -173,7 +170,7 @@ class FileReader:
     def logError(self, lineNumber: int, rawData: str, message: str):
         """Registra error en bitácora"""
         errorEntry = f"Línea {lineNumber}, dato '{rawData}': {message}"
-        self.errorLog.append(errorEntry)
+        self.errorLog.addElementAtEnd(errorEntry)
     
     def getDimensions(self) -> tuple:
         """Devuelve dimensiones de los datos procesados"""

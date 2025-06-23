@@ -60,6 +60,10 @@ class InvalidFileContentError(FileOperationException):
     """El contenido del archivo no cumple con el formato esperado"""
     pass
 
+class IOException(FileOperationException):
+    """Error durante operaciones de entrada/salida (lectura/escritura)"""
+    pass
+
 # ===== Structural Errors =====
 class EmptyStructureException(ProjectBaseException):
     """Operación inválida sobre una estructura de datos vacía"""
