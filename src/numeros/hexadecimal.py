@@ -1,93 +1,86 @@
 from numeros.numero import Number
-from utilidades.normalizador import normalizeHexadecimal
+from utilidades.normalizador import normalizeHexadecimalNumber
 from errores.tiposErrores import InvalidNumberFormatError
 
 class Hexadecimal(Number):
-    def __init__(self, valorEntrada: str):
-        """
-        Representa un número hexadecimal con validación y análisis.
-        
-        Args:
-            valorEntrada: Cadena hexadecimal (ej: "1A.3F")
-            
-        Raises:
-            InvalidNumberFormatError: Si formato inválido
-        """
-        valorProcesado = valorEntrada.upper().replace(' ', '')
-        super().__init__(valorProcesado)
+    def __init__(self, inputValue: str):
+        processedValue = inputValue.upper().replace(' ', '')
+        super().__init__(processedValue)
     
-    def determinarBase(self) -> int:
+    def determineBase(self) -> int:
         return 16
     
-    def esValido(self, valor: str) -> bool:
-        """
-        Valida formato hexadecimal (0-9, A-F, punto decimal opcional).
+    def isValid(self, value: str) -> bool:  # Corregido: Usar nombre de clase base
+        # Permitir signo opcional
+        if value.startswith('-') or value.startswith('+'):
+            value = value[1:]
         
-        Args:
-            valor: Cadena a validar
-            
-        Returns:
-            True si es hexadecimal válido
-        """
-        if valor.startswith('-') or valor.startswith('+'):
-            valor = valor[1:]
+        # Convertir a mayúsculas para validación
+        value = value.upper()
         
-        partes = valor.split('.')
-        if len(partes) > 2:
+        # Dividir en parte entera y fraccionaria
+        parts = value.split('.')
+        if len(parts) > 2:  # Maximo un punto decimal
             return False
         
-        caracteresValidos = '0123456789ABCDEF'
-        return all(all(c in caracteresValidos for c in parte) for parte in partes if parte)
+        validChars = '0123456789ABCDEF'
+        for part in parts:
+            if part:
+                if not all(char in validChars for char in part):
+                    return False
+        return True
     
-    def normalizar(self):
-        self.formaNormalizada = normalizeHexadecimal(self.valorOriginal)
+    def normalizeValue(self):
+        self.normalizedForm = normalizeHexadecimalNumber(self.originalValue)
     
-    def contarCifrasSignificativas(self):
-        """Misma lógica que decimal/binario"""
-        valor = self.valorOriginal
+    def countSignificantDigits(self):
+        value = self.originalValue
         
-        if valor.startswith('-') or valor.startswith('+'):
-            valor = valor[1:]
+        # Manejar signo
+        if value.startswith('-') or value.startswith('+'):
+            value = value[1:]
         
-        if valor.replace('0', '').replace('.', '').replace('A', '').replace('B', '').replace('C', '').replace('D', '').replace('E', '').replace('F', '') == '':
-            self.cifrasSignificativas = 1
+        # Caso especial: cero
+        if all(char in '0.' for char in value):
+            self.significantDigits = 1
             return
         
-        partes = valor.split('.')
-        parteEntera = partes[0].lstrip('0')
-        parteDecimal = partes[1].rstrip('0') if len(partes) > 1 else ""
+        # Dividir en parte entera y fraccionaria
+        parts = value.split('.')
+        integerPart = parts[0].lstrip('0')
+        fractionalPart = parts[1] if len(parts) > 1 else ""
         
-        if parteEntera:
-            self.cifrasSignificativas = len(parteEntera) + len(parteDecimal)
+        # Combinar digitos significativos (sin ceros iniciales/finales)
+        significantDigits = integerPart + fractionalPart
+        significantDigits = significantDigits.lstrip('0')
+        
+        if significantDigits == "":
+            self.significantDigits = 1  # Caso 0.000
         else:
-            for i, char in enumerate(parteDecimal):
-                if char != '0':
-                    self.cifrasSignificativas = len(parteDecimal) - i
-                    return
-            self.cifrasSignificativas = 1
+            self.significantDigits = len(significantDigits)
     
-    def determinarOperacionesSoportadas(self):
-        """Hexadecimales soportan +, -, *, / (excepto división por cero)"""
-        self.operacionesSoportadas = ['+', '-', '*']
+    def determineSupportedOperations(self):
+        self.supportedOperations = ['+', '-', '*']
         
-        # Permitir división solo si no es cero
-        caracteresNoCero = self.valorOriginal.replace('0', '').replace('.', '').replace('-', '').replace('+', '')
-        if caracteresNoCero:
-            self.operacionesSoportadas.append('/')
+        # Permitir division solo si no es cero
+        valueWithoutSign = self.originalValue.replace('-', '').replace('+', '')
+        if not all(char in '0.' for char in valueWithoutSign):
+            self.supportedOperations.append('/')
     
-    def convertirADecimal(self) -> float:
-        """Convierte hexadecimal a valor decimal"""
-        signo = -1 if self.valorOriginal.startswith('-') else 1
-        valor = self.valorOriginal.replace('-', '').replace('+', '')
+    def convertToFloat(self) -> float:
+        sign = -1 if self.originalValue.startswith('-') else 1
+        value = self.originalValue.replace('-', '').replace('+', '')
         
-        partes = valor.split('.')
-        entero = int(partes[0], 16) if partes[0] else 0
-        decimal = 0.0
+        parts = value.split('.')
+        integerValue = int(parts[0], 16) if parts[0] else 0
+        fractionalValue = 0.0
         
-        if len(partes) > 1 and partes[1]:
-            for i, char in enumerate(partes[1], 1):
-                decimal += int(char, 16) * (16 ** (-i))
+        if len(parts) > 1 and parts[1]:
+            for position, hexChar in enumerate(parts[1], 1):
+                fractionalValue += int(hexChar, 16) * (16 ** (-position))
         
-        return signo * (entero + decimal)
+        return sign * (integerValue + fractionalValue)
     
-    # Métodos de acceso (mismos que Decimal/Binario)
+    # Métodos de acceso (consistentes con clase base)
+    def getSignificantDigitsCount(self) -> int:
+        return self.significantDigits

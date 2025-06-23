@@ -1,23 +1,7 @@
 def normalizeDecimalNumber(inputValue: str) -> str:
-    """
-    Normaliza un número decimal a notación científica.
-    Ejemplos:
-    "123.45" -> "1.2345 × 10^2"
-    "-0.00123" -> "-1.23 × 10^{-3}"
-    "+1000" -> "1 × 10^3"
-    
-    Args:
-        inputValue: Cadena con número decimal
-        
-    Returns:
-        Representación en notación científica
-        
-    Raises:
-        ValueError: Si el formato es inválido
-    """
     # Validar entrada
     if not inputValue or not isinstance(inputValue, str):
-        raise ValueError("Valor de entrada inválido")
+        raise ValueError("Valor de entrada invalido")
     
     # Manejar signo
     signCharacter = ''
@@ -45,20 +29,23 @@ def normalizeDecimalNumber(inputValue: str) -> str:
     else:
         fractionalPart = ""
     
-    # Combinar todos los dígitos significativos
+    # Combinar todos los digitos significativos
     significantDigits = integerPart + fractionalPart
     significantDigits = significantDigits.lstrip('0') or '0'
     
-    # Manejar caso donde no hay dígitos significativos
+    # Manejar caso donde no hay digitos significativos
     if significantDigits == '0':
         return "0"
     
     # Determinar exponente
+    exponentValue = 0
+    mantissaValue = ""
+    
     if integerPart != '0':
         exponentValue = len(integerPart) - 1
         mantissaValue = significantDigits[0] + '.' + significantDigits[1:]
     else:
-        # Buscar primer dígito no cero en decimal
+        # Buscar primer digito no cero en decimal
         for index, char in enumerate(fractionalPart):
             if char != '0':
                 exponentValue = -(index + 1)
@@ -71,20 +58,7 @@ def normalizeDecimalNumber(inputValue: str) -> str:
     
     return f"{signCharacter}{mantissaValue} × 10^{exponentValue}"
 
-
 def normalizeBinaryNumber(inputValue: str) -> str:
-    """
-    Normaliza un número binario a notación científica.
-    Ejemplos:
-    "101.01" -> "1.0101 × 2^2"
-    "-0.00101" -> "-1.01 × 2^{-3}"
-    
-    Args:
-        inputValue: Cadena con número binario
-        
-    Returns:
-        Representación en notación científica binaria
-    """
     # Manejar signo
     signCharacter = ''
     if inputValue.startswith('-'):
@@ -110,14 +84,16 @@ def normalizeBinaryNumber(inputValue: str) -> str:
     else:
         fractionalPart = ""
     
-    # Combinar dígitos significativos
+    # Combinar digitos significativos
     significantDigits = integerPart + fractionalPart
     significantDigits = significantDigits.lstrip('0') or '0'
     
     if significantDigits == '0':
         return "0"
     
-    # Determinar exponente
+    exponentValue = 0
+    mantissaValue = ""
+    
     if integerPart != '0':
         exponentValue = len(integerPart) - 1
         mantissaValue = significantDigits[0] + '.' + significantDigits[1:]
@@ -128,7 +104,6 @@ def normalizeBinaryNumber(inputValue: str) -> str:
                 mantissaValue = fractionalPart[index] + '.' + fractionalPart[index+1:]
                 break
     
-    # Limpiar mantisa
     if '.' in mantissaValue:
         mantissaValue = mantissaValue.rstrip('0').rstrip('.')
     
@@ -136,19 +111,7 @@ def normalizeBinaryNumber(inputValue: str) -> str:
 
 
 def normalizeHexadecimalNumber(inputValue: str) -> str:
-    """
-    Normaliza un número hexadecimal a notación científica.
-    Ejemplos:
-    "1A.3F" -> "1.A3F × 16^1"
-    "-0.00F2" -> "-F.2 × 16^{-3}"
-    
-    Args:
-        inputValue: Cadena con número hexadecimal
-        
-    Returns:
-        Representación en notación científica hexadecimal
-    """
-    # Manejar signo y convertir a mayúsculas
+    # Manejar signo y convertir a mayusculas
     signCharacter = ''
     if inputValue.startswith('-'):
         signCharacter = '-'
@@ -173,14 +136,15 @@ def normalizeHexadecimalNumber(inputValue: str) -> str:
     else:
         fractionalPart = ""
     
-    # Combinar dígitos significativos
     significantDigits = integerPart + fractionalPart
     significantDigits = significantDigits.lstrip('0') or '0'
     
     if significantDigits == '0':
         return "0"
     
-    # Determinar exponente
+    exponentValue = 0
+    mantissaValue = ""
+    
     if integerPart != '0':
         exponentValue = len(integerPart) - 1
         mantissaValue = significantDigits[0] + '.' + significantDigits[1:]
@@ -190,8 +154,7 @@ def normalizeHexadecimalNumber(inputValue: str) -> str:
                 exponentValue = -(index + 1)
                 mantissaValue = fractionalPart[index] + '.' + fractionalPart[index+1:]
                 break
-    
-    # Limpiar mantisa
+
     if '.' in mantissaValue:
         mantissaValue = mantissaValue.rstrip('0').rstrip('.')
     

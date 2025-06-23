@@ -1,10 +1,5 @@
-"""
-Lector de archivos con validación de formato completo
-Implementa procesamiento de datos con estructuras propias
-"""
-
 from estructuras.listaEnlazada import LinkedList
-from numeros.binario import Binario
+from numeros.binario import Binary
 from numeros.decimal import Decimal
 from numeros.hexadecimal import Hexadecimal
 from utilidades.validadorFormato import FormatValidator
@@ -17,27 +12,12 @@ from errores.tiposErrores import (
 
 class FileReader:
     def __init__(self):
-        """Inicializa estructuras de datos propias"""
         self.processedData = LinkedList()
         self.errorLog = LinkedList()
         self.totalRows = 0
         self.totalColumns = 0
     
     def processInputFile(self, filePath: str) -> LinkedList:
-        """
-        Procesa un archivo y devuelve datos estructurados
-        
-        Args:
-            filePath: Ruta completa al archivo
-            
-        Returns:
-            LinkedList con datos procesados
-            
-        Raises:
-            FileNameFormatError: Si el nombre no cumple formato
-            FileNotFoundException: Si el archivo no existe
-            IOException: Si hay errores de lectura
-        """
         fileName = self.extractFileNameFromPath(filePath)
         
         # Validar formato del nombre usando FormatValidator
@@ -50,7 +30,6 @@ class FileReader:
         return self.processedData
     
     def extractFileNameFromPath(self, path: str) -> str:
-        """Extrae nombre de archivo usando estructuras propias"""
         pathParts = LinkedList()
         currentSegment = ""
         
@@ -68,7 +47,6 @@ class FileReader:
         return pathParts.getElementAtIndex(pathParts.getListLength() - 1) if pathParts.getListLength() > 0 else ""
     
     def readFileLines(self, filePath: str) -> LinkedList:
-        """Lee archivo usando solo estructuras propias"""
         linesQueue = LinkedList()
         
         try:
@@ -95,7 +73,6 @@ class FileReader:
         return linesQueue
     
     def processAllLines(self, linesQueue: LinkedList):
-        """Procesa todas las líneas del archivo"""
         currentLineNode = linesQueue.headNode
         lineCounter = 1
         
@@ -113,7 +90,6 @@ class FileReader:
             lineCounter += 1
     
     def processSingleLine(self, lineContent: str, lineNumber: int) -> LinkedList:
-        """Procesa una línea individual"""
         rowData = LinkedList()
         fields = self.splitFields(lineContent)
         currentFieldNode = fields.headNode
@@ -131,7 +107,6 @@ class FileReader:
         return rowData
     
     def splitFields(self, lineContent: str) -> LinkedList:
-        """Divide campos usando '#' como separador"""
         fieldList = LinkedList()
         currentField = ""
         
@@ -149,33 +124,26 @@ class FileReader:
         return fieldList
     
     def createNumberObject(self, rawValue: str):
-        """
-        Crea objeto numérico según el tipo detectado
-        Usa FormatValidator para determinar el sistema numérico
-        """
         normalizedValue = rawValue.replace(',', '.').lower()
         
         # Usar FormatValidator para determinar el sistema numérico
         numberSystem = FormatValidator.determineNumberSystem(normalizedValue)
         
         if numberSystem == "Binario":
-            return Binario(normalizedValue)
+            return Binary(normalizedValue)
         elif numberSystem == "Decimal":
             return Decimal(normalizedValue)
         elif numberSystem == "Hexadecimal":
             return Hexadecimal(normalizedValue)
         else:
-            raise InvalidNumberFormatError("Formato numérico desconocido")
+            raise InvalidNumberFormatError("Formato numerico desconocido")
     
     def logError(self, lineNumber: int, rawData: str, message: str):
-        """Registra error en bitácora"""
-        errorEntry = f"Línea {lineNumber}, dato '{rawData}': {message}"
+        errorEntry = f"Linea {lineNumber}, dato '{rawData}': {message}"
         self.errorLog.addElementAtEnd(errorEntry)
     
     def getDimensions(self) -> tuple:
-        """Devuelve dimensiones de los datos procesados"""
         return (self.totalRows, self.totalColumns)
     
     def getErrorLog(self) -> LinkedList:
-        """Devuelve bitácora de errores"""
         return self.errorLog

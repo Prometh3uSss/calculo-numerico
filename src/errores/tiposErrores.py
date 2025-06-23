@@ -1,9 +1,9 @@
 class ProjectBaseException(Exception):
-    """Excepción base para todos los errores personalizados del proyecto"""
+    """Excepcion base para todos los errores personalizados del proyecto"""
     pass
 
 class NumericCalculationException(ProjectBaseException):
-    """Clase base para errores relacionados con cálculos numéricos"""
+    """Clase base para errores relacionados con calculos numericos"""
     pass
 
 class FileOperationException(ProjectBaseException):
@@ -12,23 +12,23 @@ class FileOperationException(ProjectBaseException):
 
 # ===== Numeric Errors =====
 class DivisionByZeroError(NumericCalculationException):
-    """Se intentó realizar una división donde el denominador es cero"""
+    """Se intento realizar una división donde el denominador es cero"""
     pass
 
 class MathematicalIndeterminacyError(NumericCalculationException):
-    """Operación matemática con resultado indeterminado (0/0, ∞/∞, etc.)"""
+    """Operacion matematica con resultado indeterminado (0/0, ∞/∞, etc.)"""
     pass
 
 class NumericOverflowError(NumericCalculationException):
-    """El resultado de un cálculo excede el rango numérico representable"""
+    """El resultado de un calculo excede el rango numerico representable"""
     pass
 
 class NumericUnderflowError(NumericCalculationException):
-    """El resultado de un cálculo es un número demasiado pequeño para ser representado"""
+    """El resultado de un calculo es un numero demasiado pequeño para ser representado"""
     pass
 
 class InvalidNumberFormatError(NumericCalculationException):
-    """El formato de un número no coincide con el sistema numérico esperado"""
+    """El formato de un numero no coincide con el sistema numerico esperado"""
     pass
 
 class MatrixDimensionsError(NumericCalculationException):
@@ -36,7 +36,7 @@ class MatrixDimensionsError(NumericCalculationException):
     pass
 
 class InvalidNumericOperationError(NumericCalculationException):
-    """Operación numérica no válida para el tipo de dato o sistema numérico"""
+    """Operacion numerica no valida para el tipo de dato o sistema numerico"""
     pass
 
 # ===== File Errors =====
@@ -45,7 +45,7 @@ class FileNameFormatError(FileOperationException):
     pass
 
 class FileNotFoundException(FileOperationException):
-    """No se encontró el archivo solicitado en la ruta especificada"""
+    """No se encontro el archivo solicitado en la ruta especificada"""
     pass
 
 class FileReadError(FileOperationException):
@@ -66,13 +66,13 @@ class IOException(FileOperationException):
 
 # ===== Structural Errors =====
 class EmptyStructureException(ProjectBaseException):
-    """Operación inválida sobre una estructura de datos vacía"""
+    """Operación invalida sobre una estructura de datos vacia"""
     pass
 
 class IndexOutOfBoundsException(ProjectBaseException):
-    """Intento de acceso a un índice fuera del rango válido"""
+    """Intento de acceso a un indice fuera del rango valido"""
     pass
 
 class InvalidDataTypeException(ProjectBaseException):
-    """Tipo de dato incompatible con la operación solicitada"""
+    """Tipo de dato incompatible con la operacion solicitada"""
     pass

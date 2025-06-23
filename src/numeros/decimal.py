@@ -1,110 +1,77 @@
 from numeros.numero import Number
-from utilidades.normalizador import normalizeDecimal
+from utilidades.normalizador import normalizeDecimalNumber
 from errores.tiposErrores import InvalidNumberFormatError
 
 class Decimal(Number):
-    def __init__(self, valorEntrada: str):
-        """
-        Representa un número decimal con validación, normalización y análisis de cifras significativas.
-        
-        Args:
-            valorEntrada: Cadena que representa el número decimal
-            
-        Raises:
-            InvalidNumberFormatError: Si el formato no es válido
-        """
-        valorProcesado = valorEntrada.replace(',', '.').replace(' ', '')
-        super().__init__(valorProcesado)
+    def __init__(self, inputValue: str):
+        processedValue = inputValue.replace(',', '.').replace(' ', '')
+        super().__init__(processedValue)
     
-    def determinarBase(self) -> int:
+    def determineBase(self) -> int:
         return 10
     
-    def esValido(self, valor: str) -> bool:
-        """
-        Valida formato decimal (dígitos, signo opcional, punto decimal opcional).
+    def isValid(self, value: str) -> bool:
+        # Permitir signo opcional
+        if value.startswith('-') or value.startswith('+'):
+            value = value[1:]
         
-        Args:
-            valor: Cadena a validar
-            
-        Returns:
-            True si es válido, False en caso contrario
-        """
-        # Patrón: [signo]dígitos[.dígitos]
-        if valor.startswith('-') or valor.startswith('+'):
-            valor = valor[1:]
+        # Casos especiales: notacion cientifica
+        if 'e' in value.lower():
+            parts = value.lower().split('e')
+            if len(parts) != 2:
+                return False
+            return all(self.isValidPart(p) for p in parts)
         
-        partes = valor.split('.')
-        if len(partes) > 2:
-            return False  # Múltiples puntos decimales
-        
-        # Todas las partes deben ser dígitos
-        return all(parte.isdigit() for parte in partes if parte)
+        return self.isValidPart(value)
     
-    def normalizar(self):
-        """Convierte a notación científica decimal"""
-        self.formaNormalizada = normalizeDecimal(self.valorOriginal)
+    def isValidPart(self, part: str) -> bool:
+        if '.' in part:
+            integer, fractional = part.split('.', 1)
+            return integer.isdigit() and fractional.isdigit()
+        return part.isdigit()
     
-    def contarCifrasSignificativas(self):
-        """
-        Calcula cifras significativas según reglas:
-        - Ceros iniciales no significativos
-        - Ceros finales después del punto son significativos
-        - Ceros entre dígitos significativos
-        """
-        valor = self.valorOriginal
+    def normalizeValue(self):
+        self.normalizedForm = normalizeDecimalNumber(self.originalValue)
+    
+    def countSignificantDigits(self):
+        value = self.originalValue
         
         # Manejar signo
-        if valor.startswith('-') or valor.startswith('+'):
-            valor = valor[1:]
+        if value.startswith('-') or value.startswith('+'):
+            value = value[1:]
         
         # Caso especial: cero
-        if valor.replace('0', '').replace('.', '') == '':
-            self.cifrasSignificativas = 1
+        if value.replace('0', '').replace('.', '') == '':
+            self.significantDigits = 1
             return
         
-        partes = valor.split('.')
-        parteEntera = partes[0].lstrip('0')
+        # Manejar notacion cientifica
+        if 'e' in value.lower():
+            mantissa, _ = value.lower().split('e')
+            value = mantissa
         
-        if len(partes) > 1:
-            parteDecimal = partes[1].rstrip('0')
-        else:
-            parteDecimal = ""
+        # Dividir en parte entera y fraccionaria
+        parts = value.split('.')
+        integerPart = parts[0].lstrip('0')
         
-        if parteEntera:
-            self.cifrasSignificativas = len(parteEntera) + len(parteDecimal)
+        if len(parts) > 1:
+            fractionalPart = parts[1].rstrip('0')
         else:
-            # Contar desde primer dígito no cero en decimal
-            for i, char in enumerate(parteDecimal):
-                if char != '0':
-                    self.cifrasSignificativas = len(parteDecimal) - i
-                    return
-            self.cifrasSignificativas = 1
+            fractionalPart = ""
+        
+        # Combinar digitos significativos
+        significantDigits = integerPart + fractionalPart
+        
+        if significantDigits == "":
+            self.significantDigits = 1
+        else:
+            self.significantDigits = len(significantDigits)
     
-    def determinarOperacionesSoportadas(self):
-        """Decimales soportan todas las operaciones básicas"""
-        self.operacionesSoportadas = ['+', '-', '*', '/']
+    def determineSupportedOperations(self):
+        self.supportedOperations = ['+', '-', '*', '/']
     
-    def convertirADecimal(self) -> float:
-        """Convierte a valor flotante decimal"""
-        return float(self.valorOriginal.replace(',', '.'))
+    def convertToFloat(self) -> float:
+        return float(self.originalValue.replace(',', '.'))
     
-    def obtenerValorOriginal(self) -> str:
-        return self.valorOriginal
-    
-    def obtenerFormaNormalizada(self) -> str:
-        return self.formaNormalizada
-    
-    def obtenerCantidadCifrasSignificativas(self) -> int:
-        return self.cifrasSignificativas
-    
-    def obtenerOperacionesSoportadas(self) -> list:
-        return self.operacionesSoportadas
-    
-    def obtenerBase(self) -> int:
-        return self.base
-    
-    def __str__(self) -> str:
-        return (f"Decimal: {self.valorOriginal} | "
-                f"Normalizado: {self.formaNormalizada} | "
-                f"Cifras: {self.cifrasSignificativas} | "
-                f"Operaciones: {''.join(self.operacionesSoportadas)}")
+    def getSignificantDigitsCount(self) -> int:
+        return self.significantDigits

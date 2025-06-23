@@ -1,15 +1,10 @@
-"""
-Punto de entrada principal del sistema de cálculo numérico
-Implementa el flujo completo usando estructuras propias y nomenclatura descriptiva
-"""
-
 import os
 import time
 from estructuras.listaEnlazada import LinkedList
 from archivos.lectorArchivos import FileReader
 from utilidades.Generador import FileGenerator
 from numeros.decimal import Decimal
-from numeros.binario import Binario
+from numeros.binario import Binary
 from numeros.hexadecimal import Hexadecimal
 from errores.calculadoraErrores import ErrorCalculator
 from errores.tiposErrores import (
@@ -21,7 +16,6 @@ from errores.tiposErrores import (
 )
 
 def mainExecution():
-    """Coordina el flujo completo de ejecución del programa"""
     try:
         # 1. Configuración inicial
         dataDirectoryPath = os.path.join(os.getcwd(), 'data')
@@ -38,25 +32,16 @@ def mainExecution():
         filesToProcess = getProcessableFiles(dataDirectoryPath)
         
         if filesToProcess.getListLength() == 0:
-            print("No se encontraron archivos válidos para procesar en la carpeta 'data'")
+            print("No se encontraron archivos validos para procesar en la carpeta 'data'")
             return
         
         # 5. Procesar cada archivo
         processFileCollection(filesToProcess, fileProcessor, fileGenerator)
         
     except Exception as criticalError:
-        print(f"Error crítico en la ejecución: {str(criticalError)}")
+        print(f"Error critico en la ejecucion: {str(criticalError)}")
 
 def setupProcessingEnvironment(outputDirectory: str):
-    """
-    Crea el directorio de salida si no existe
-    
-    Args:
-        outputDirectory: Ruta del directorio de salida
-        
-    Raises:
-        OSError: Si no se puede crear el directorio
-    """
     if not os.path.exists(outputDirectory):
         try:
             os.makedirs(outputDirectory)
@@ -65,15 +50,6 @@ def setupProcessingEnvironment(outputDirectory: str):
             raise OSError(f"Error creando directorio: {str(osError)}")
 
 def getProcessableFiles(directoryPath: str) -> LinkedList:
-    """
-    Obtiene archivos .txt en el directorio especificado
-    
-    Args:
-        directoryPath: Ruta a escanear
-        
-    Returns:
-        Lista enlazada con rutas completas de archivos
-    """
     fileList = LinkedList()
     
     try:
@@ -87,14 +63,6 @@ def getProcessableFiles(directoryPath: str) -> LinkedList:
     return fileList
 
 def processFileCollection(fileList: LinkedList, fileProcessor: FileReader, fileGenerator: FileGenerator):
-    """
-    Procesa todos los archivos en la lista
-    
-    Args:
-        fileList: Lista de rutas de archivos
-        fileProcessor: Instancia de FileReader
-        fileGenerator: Instancia de FileGenerator
-    """
     currentNode = fileList.headNode
     
     while currentNode:
@@ -108,17 +76,6 @@ def processFileCollection(fileList: LinkedList, fileProcessor: FileReader, fileG
         currentNode = currentNode.nextNode
 
 def processSingleInputFile(filePath: str, fileProcessor: FileReader, fileGenerator: FileGenerator):
-    """
-    Procesa un archivo individual y genera resultados
-    
-    Args:
-        filePath: Ruta completa al archivo
-        fileProcessor: Instancia de FileReader
-        fileGenerator: Instancia de FileGenerator
-        
-    Raises:
-        FileProcessingException: Para errores específicos de procesamiento
-    """
     try:
         startTime = time.time()
         fileName = os.path.basename(filePath)
@@ -141,36 +98,23 @@ def processSingleInputFile(filePath: str, fileProcessor: FileReader, fileGenerat
         baseName = fileName.split('_')[0]
         outputFilePath = fileGenerator.generateOutputFile(baseName, analysisResults)
         
-        # 5. Mostrar estadísticas
+        # 5. Mostrar estadisticas
         displayProcessingStatistics(startTime, outputFilePath, fileProcessor)
         
     except (FileNameFormatError, FileNotFoundException, IOException) as ioError:
         raise FileProcessingException(f"Error de entrada/salida: {str(ioError)}")
     except NumberProcessingException as numError:
-        raise FileProcessingException(f"Error numérico: {str(numError)}")
+        raise FileProcessingException(f"Error numerico: {str(numError)}")
     except Exception as processingError:
         raise FileProcessingException(f"Error procesando {filePath}: {str(processingError)}")
 
 def printProcessingHeader(fileName: str):
-    """
-    Imprime encabezado informativo para el procesamiento
-    
-    Args:
-        fileName: Nombre del archivo a procesar
-    """
     separator = "=" * 50
     print(f"\n{separator}")
     print(f"Procesando archivo: {fileName}")
     print(f"{separator}")
 
 def calculateNumericalAnalysis(processedData: LinkedList, resultContainer: LinkedList):
-    """
-    Calcula resultados numéricos para cada valor procesado
-    
-    Args:
-        processedData: Datos procesados (lista de filas)
-        resultContainer: Contenedor para almacenar resultados
-    """
     currentRowNode = processedData.headNode
     rowNumber = 1
     
@@ -191,17 +135,6 @@ def calculateNumericalAnalysis(processedData: LinkedList, resultContainer: Linke
         rowNumber += 1
 
 def formatAnalysisResult(rowIndex: int, columnIndex: int, numberObject) -> str:
-    """
-    Formatea el resultado de análisis para un número
-    
-    Args:
-        rowIndex: Número de fila
-        columnIndex: Número de columna
-        numberObject: Objeto numérico (Decimal, Binario, Hexadecimal)
-        
-    Returns:
-        Cadena formateada con resultados
-    """
     try:
         normalizedForm = numberObject.getNormalizedForm()
         significantDigits = numberObject.getSignificantDigitCount()
@@ -218,16 +151,7 @@ def formatAnalysisResult(rowIndex: int, columnIndex: int, numberObject) -> str:
         return f"Error formateando resultado: {str(formatError)}"
 
 def getNumberTypeDescription(numberObject) -> str:
-    """
-    Devuelve descripción del tipo de número
-    
-    Args:
-        numberObject: Instancia de número
-        
-    Returns:
-        Nombre del tipo (Binario, Decimal, Hexadecimal)
-    """
-    if isinstance(numberObject, Binario):
+    if isinstance(numberObject, Binary):
         return "Binario"
     elif isinstance(numberObject, Decimal):
         return "Decimal"
@@ -236,18 +160,11 @@ def getNumberTypeDescription(numberObject) -> str:
     return "Desconocido"
 
 def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList):
-    """
-    Calcula los 5 tipos de errores requeridos
-    
-    Args:
-        processedData: Datos procesados
-        resultContainer: Contenedor para agregar resultados de errores
-    """
     if processedData.getListLength() < 1:
         return
     
     try:
-        # Obtener los primeros dos números válidos
+        # Obtener los primeros dos numeros validos
         firstRow = processedData.headNode.elementData
         if firstRow.getListLength() < 2:
             return
@@ -255,7 +172,7 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
         firstNumber = firstRow.headNode.elementData
         secondNumber = firstRow.headNode.nextNode.elementData
         
-        # Calcular errores usando métodos estáticos
+        # Calcular errores usando metodos estaticos
         absoluteError = ErrorCalculator.calculateAbsoluteError(
             firstNumber.convertToDecimal(),
             secondNumber.convertToDecimal()
@@ -266,39 +183,31 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
             secondNumber.convertToDecimal()
         )
         
-        # Usar 4 dígitos significativos como ejemplo
+        # Usar 4 digitos significativos como ejemplo
         roundingError = ErrorCalculator.calculateRoundingError(4)
         truncationError = ErrorCalculator.calculateTruncationError(4)
         
-        # Propagación de errores (ejemplo con valores absolutos)
+        # Propagacion de errores (ejemplo con valores absolutos)
         propagationError = ErrorCalculator.calculateProductErrorPropagation(
             [firstNumber.convertToDecimal(), secondNumber.convertToDecimal()],
             [absoluteError, absoluteError]
         )
         
         # Agregar resultados
-        resultContainer.addElementAtEnd("\n=== Resultados de Análisis de Errores ===")
-        resultContainer.addElementAtEnd(f"Comparación: {firstNumber.getOriginalValue()} vs {secondNumber.getOriginalValue()}")
+        resultContainer.addElementAtEnd("\n=== Resultados de Analisis de Errores ===")
+        resultContainer.addElementAtEnd(f"Comparacion: {firstNumber.getOriginalValue()} vs {secondNumber.getOriginalValue()}")
         resultContainer.addElementAtEnd(f"Error Absoluto: {absoluteError}")
         resultContainer.addElementAtEnd(f"Error Relativo: {relativeError}")
         resultContainer.addElementAtEnd(f"Error por Redondeo: {roundingError}")
         resultContainer.addElementAtEnd(f"Error por Truncamiento: {truncationError}")
-        resultContainer.addElementAtEnd(f"Error por Propagación: {propagationError}")
+        resultContainer.addElementAtEnd(f"Error por Propagacion: {propagationError}")
         
     except NumberProcessingException as numError:
-        resultContainer.addElementAtEnd(f"Error en cálculo de errores: {str(numError)}")
+        resultContainer.addElementAtEnd(f"Error en calculo de errores: {str(numError)}")
     except Exception as generalError:
-        resultContainer.addElementAtEnd(f"Error inesperado en cálculo de errores: {str(generalError)}")
+        resultContainer.addElementAtEnd(f"Error inesperado en calculo de errores: {str(generalError)}")
 
 def displayProcessingStatistics(startTime: float, outputPath: str, fileProcessor: FileReader):
-    """
-    Muestra estadísticas del procesamiento
-    
-    Args:
-        startTime: Tiempo de inicio del procesamiento
-        outputPath: Ruta del archivo generado
-        fileProcessor: Instancia de FileReader para acceder a errores
-    """
     processingDuration = time.time() - startTime
     print(f"Archivo procesado en {processingDuration:.4f} segundos")
     print(f"Resultados guardados en: {outputPath}")
