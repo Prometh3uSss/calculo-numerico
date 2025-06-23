@@ -17,13 +17,15 @@ class Binary(Number):
         
         # Dividir en parte entera y fraccionaria
         parts = value.split('.')
-        if len(parts) > 2:  # Maximo un punto decimal
+        if len(parts) > 2:  # Máximo un punto decimal
             return False
         
-        # Cada parte debe contener solo 0 y 1
+        # Validación optimizada con terminación temprana
         for part in parts:
-            if part and not all(char in '01' for char in part):
-                return False
+            if part:
+                for char in part:
+                    if char not in '01': 
+                        return False
         return True
     
     def normalizeValue(self):  # Corregido: Nombre requerido por clase base

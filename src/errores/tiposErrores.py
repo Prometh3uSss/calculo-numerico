@@ -40,6 +40,10 @@ class InvalidNumericOperationError(NumericCalculationException):
     pass
 
 # ===== File Errors =====
+class FileProcessingException(FileOperationException):
+    """Excepción general para errores durante el procesamiento de archivos"""
+    pass
+
 class FileNameFormatError(FileOperationException):
     """El nombre del archivo no cumple con el formato requerido"""
     pass

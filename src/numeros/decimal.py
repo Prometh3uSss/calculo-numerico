@@ -20,14 +20,29 @@ class Decimal(Number):
             parts = value.lower().split('e')
             if len(parts) != 2:
                 return False
-            return all(self.isValidPart(p) for p in parts)
+            if not self.isValidPart(parts[0]) or not self.isValidPart(parts[1]):
+                return False
+            return True
         
         return self.isValidPart(value)
     
     def isValidPart(self, part: str) -> bool:
+        # Caso especial: parte vacía
+        if not part:
+            return True
+            
+        # Verificar si hay punto decimal
         if '.' in part:
             integer, fractional = part.split('.', 1)
-            return integer.isdigit() and fractional.isdigit()
+            # Validar parte entera
+            if integer and not integer.isdigit():
+                return False
+            # Validar parte fraccionaria
+            if fractional and not fractional.isdigit():
+                return False
+            return True
+        
+        # Parte sin punto decimal
         return part.isdigit()
     
     def normalizeValue(self):

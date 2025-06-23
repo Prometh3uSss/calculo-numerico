@@ -17,7 +17,7 @@ def normalizeDecimalNumber(inputValue: str) -> str:
     processedValue = processedValue.replace(',', '.').replace(' ', '')
     
     # Caso especial: cero
-    if all(char in '0.,' for char in processedValue):
+    if set(processedValue).issubset('0.,'):  # <-- Reemplazar el all()
         return "0"
     
     # Dividir en parte entera y decimal
@@ -72,7 +72,7 @@ def normalizeBinaryNumber(inputValue: str) -> str:
     processedValue = processedValue.replace(',', '.')
     
     # Caso especial: cero
-    if all(char in '0.,' for char in processedValue):
+    if set(processedValue).issubset('0.,'):
         return "0"
     
     # Dividir en parte entera y decimal
@@ -109,7 +109,6 @@ def normalizeBinaryNumber(inputValue: str) -> str:
     
     return f"{signCharacter}{mantissaValue} × 2^{exponentValue}"
 
-
 def normalizeHexadecimalNumber(inputValue: str) -> str:
     # Manejar signo y convertir a mayusculas
     signCharacter = ''
@@ -124,7 +123,7 @@ def normalizeHexadecimalNumber(inputValue: str) -> str:
     processedValue = processedValue.upper().replace(',', '.')
     
     # Caso especial: cero
-    if all(char in '0.,' for char in processedValue):
+    if set(processedValue).issubset('0.,'):  # <-- Reemplazar el all()
         return "0"
     
     # Dividir en parte entera y decimal

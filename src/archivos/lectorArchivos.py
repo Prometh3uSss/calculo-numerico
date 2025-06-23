@@ -24,10 +24,88 @@ class FileReader:
         if not FormatValidator.validateFileName(fileName):
             raise FileNameFormatError(f"Formato inválido: {fileName}")
         
-        rawLines = self.readFileLines(filePath)
+        # Determinar tipo de archivo
+        isBinaryFile = self.isValidBinaryFile(filePath)
+        
+        # Leer líneas según tipo de archivo
+        if isBinaryFile:
+            rawLines = self.readBinaryFile(filePath)
+        else:
+            rawLines = self.readTextFileLines(filePath)
+            
         self.processAllLines(rawLines)
         
         return self.processedData
+    
+    def isValidBinaryFile(self, filePath: str) -> bool:
+        try:
+            with open(filePath, 'rb') as file:
+                # Leer primeros 1024 bytes para análisis
+                chunk = file.read(1024)
+                # Archivo es binario si contiene bytes no decodificables
+                try:
+                    chunk.decode('utf-8')
+                    return False
+                except UnicodeDecodeError:
+                    return True
+        except Exception:
+            return False
+    
+    def readBinaryFile(self, filePath: str) -> LinkedList:
+        linesQueue = LinkedList()
+        
+        try:
+            with open(filePath, 'rb') as file:
+                binaryData = file.read()
+                
+                try:
+                    decodedText = binaryData.decode('utf-8')
+                except UnicodeDecodeError:
+                    decodedText = binaryData.decode('iso-8859-1')
+                
+                currentLine = ""
+                for char in decodedText:
+                    if char == '\n':
+                        linesQueue.addElementAtEnd(currentLine.strip())
+                        currentLine = ""
+                    else:
+                        currentLine += char
+                
+                if currentLine:
+                    linesQueue.addElementAtEnd(currentLine.strip())
+                    
+        except FileNotFoundError:
+            raise FileNotFoundException(f"Archivo no encontrado: {filePath}")
+        except IOError as ioError:
+            raise IOException(f"Error de lectura binaria: {str(ioError)}")
+            
+        return linesQueue
+    
+    def readTextFileLines(self, filePath: str) -> LinkedList:
+        linesQueue = LinkedList()
+        
+        try:
+            with open(filePath, 'r', encoding='utf-8') as file:
+                currentLine = ""
+                while True:
+                    char = file.read(1)
+                    if not char:
+                        break
+                    if char == '\n':
+                        linesQueue.addElementAtEnd(currentLine.strip())
+                        currentLine = ""
+                    else:
+                        currentLine += char
+                
+                if currentLine:
+                    linesQueue.addElementAtEnd(currentLine.strip())
+                    
+        except FileNotFoundError:
+            raise FileNotFoundException(f"Archivo no encontrado: {filePath}")
+        except IOError as ioError:
+            raise IOException(f"Error de lectura: {str(ioError)}")
+            
+        return linesQueue
     
     def extractFileNameFromPath(self, path: str) -> str:
         pathParts = LinkedList()

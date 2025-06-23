@@ -1,3 +1,8 @@
+"""
+Punto de entrada principal del sistema de cálculo numérico
+Implementa el flujo completo usando estructuras propias y nomenclatura descriptiva
+"""
+
 import os
 import time
 from estructuras.listaEnlazada import LinkedList
@@ -7,9 +12,8 @@ from numeros.decimal import Decimal
 from numeros.binario import Binary
 from numeros.hexadecimal import Hexadecimal
 from errores.calculadoraErrores import ErrorCalculator
-from errores.tiposErrores import (
-    FileProcessingException,
-    NumberProcessingException,
+from errores.tiposErrores import (  
+    FileProcessingException, 
     FileNameFormatError,
     FileNotFoundException,
     IOException
@@ -39,7 +43,7 @@ def mainExecution():
         processFileCollection(filesToProcess, fileProcessor, fileGenerator)
         
     except Exception as criticalError:
-        print(f"Error critico en la ejecucion: {str(criticalError)}")
+        print(f"Error critico en la ejecución: {str(criticalError)}")
 
 def setupProcessingEnvironment(outputDirectory: str):
     if not os.path.exists(outputDirectory):
@@ -50,11 +54,12 @@ def setupProcessingEnvironment(outputDirectory: str):
             raise OSError(f"Error creando directorio: {str(osError)}")
 
 def getProcessableFiles(directoryPath: str) -> LinkedList:
+    """Obtiene archivos .txt y .bin en el directorio"""
     fileList = LinkedList()
     
     try:
         for fileName in os.listdir(directoryPath):
-            if fileName.endswith('.txt'):
+            if fileName.endswith('.txt') or fileName.endswith('.bin'):  # Cambio clave
                 fullPath = os.path.join(directoryPath, fileName)
                 fileList.addElementAtEnd(fullPath)
     except FileNotFoundError:
@@ -102,11 +107,9 @@ def processSingleInputFile(filePath: str, fileProcessor: FileReader, fileGenerat
         displayProcessingStatistics(startTime, outputFilePath, fileProcessor)
         
     except (FileNameFormatError, FileNotFoundException, IOException) as ioError:
-        raise FileProcessingException(f"Error de entrada/salida: {str(ioError)}")
-    except NumberProcessingException as numError:
-        raise FileProcessingException(f"Error numerico: {str(numError)}")
+        raise FileProcessingException(f"Error de procesamiento: {str(ioError)}")
     except Exception as processingError:
-        raise FileProcessingException(f"Error procesando {filePath}: {str(processingError)}")
+        raise FileProcessingException(f"Error inesperado: {str(processingError)}")
 
 def printProcessingHeader(fileName: str):
     separator = "=" * 50
@@ -137,7 +140,7 @@ def calculateNumericalAnalysis(processedData: LinkedList, resultContainer: Linke
 def formatAnalysisResult(rowIndex: int, columnIndex: int, numberObject) -> str:
     try:
         normalizedForm = numberObject.getNormalizedForm()
-        significantDigits = numberObject.getSignificantDigitCount()
+        significantDigits = numberObject.getSignificantDigitsCount()
         operations = numberObject.getSupportedOperations()
         numberType = getNumberTypeDescription(numberObject)
         
@@ -164,7 +167,7 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
         return
     
     try:
-        # Obtener los primeros dos numeros validos
+        # Obtener los primeros dos números válidos
         firstRow = processedData.headNode.elementData
         if firstRow.getListLength() < 2:
             return
@@ -172,28 +175,22 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
         firstNumber = firstRow.headNode.elementData
         secondNumber = firstRow.headNode.nextNode.elementData
         
-        # Calcular errores usando metodos estaticos
-        absoluteError = ErrorCalculator.calculateAbsoluteError(
-            firstNumber.convertToDecimal(),
-            secondNumber.convertToDecimal()
-        )
+        # Calcular errores usando métodos estáticos
+        exactValue = firstNumber.convertToFloat()
+        approxValue = secondNumber.convertToFloat()
         
-        relativeError = ErrorCalculator.calculateRelativeError(
-            firstNumber.convertToDecimal(),
-            secondNumber.convertToDecimal()
-        )
+        absoluteError = ErrorCalculator.calculateAbsoluteError(exactValue, approxValue)
+        relativeError = ErrorCalculator.calculateRelativeError(exactValue, approxValue)
         
-        # Usar 4 digitos significativos como ejemplo
+        # Usar 4 dígitos significativos como ejemplo
         roundingError = ErrorCalculator.calculateRoundingError(4)
         truncationError = ErrorCalculator.calculateTruncationError(4)
         
-        # Propagacion de errores (ejemplo con valores absolutos)
         propagationError = ErrorCalculator.calculateProductErrorPropagation(
-            [firstNumber.convertToDecimal(), secondNumber.convertToDecimal()],
+            [exactValue, approxValue],
             [absoluteError, absoluteError]
         )
         
-        # Agregar resultados
         resultContainer.addElementAtEnd("\n=== Resultados de Analisis de Errores ===")
         resultContainer.addElementAtEnd(f"Comparacion: {firstNumber.getOriginalValue()} vs {secondNumber.getOriginalValue()}")
         resultContainer.addElementAtEnd(f"Error Absoluto: {absoluteError}")
@@ -202,17 +199,14 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
         resultContainer.addElementAtEnd(f"Error por Truncamiento: {truncationError}")
         resultContainer.addElementAtEnd(f"Error por Propagacion: {propagationError}")
         
-    except NumberProcessingException as numError:
-        resultContainer.addElementAtEnd(f"Error en calculo de errores: {str(numError)}")
     except Exception as generalError:
-        resultContainer.addElementAtEnd(f"Error inesperado en calculo de errores: {str(generalError)}")
+        resultContainer.addElementAtEnd(f"Error en calculo de errores: {str(generalError)}")
 
 def displayProcessingStatistics(startTime: float, outputPath: str, fileProcessor: FileReader):
     processingDuration = time.time() - startTime
     print(f"Archivo procesado en {processingDuration:.4f} segundos")
     print(f"Resultados guardados en: {outputPath}")
     
-    # Mostrar errores si los hay
     if not fileProcessor.getErrorLog().isEmpty():
         print("\nErrores encontrados durante el procesamiento:")
         errorNode = fileProcessor.getErrorLog().headNode

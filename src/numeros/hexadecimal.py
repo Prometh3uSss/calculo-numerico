@@ -10,12 +10,12 @@ class Hexadecimal(Number):
     def determineBase(self) -> int:
         return 16
     
-    def isValid(self, value: str) -> bool:  # Corregido: Usar nombre de clase base
+    def isValid(self, value: str) -> bool:
         # Permitir signo opcional
         if value.startswith('-') or value.startswith('+'):
             value = value[1:]
         
-        # Convertir a mayúsculas para validación
+        # Convertir a mayúsculas para validacion
         value = value.upper()
         
         # Dividir en parte entera y fraccionaria
@@ -24,10 +24,12 @@ class Hexadecimal(Number):
             return False
         
         validChars = '0123456789ABCDEF'
+        # Validacion optimizada con terminacion temprana
         for part in parts:
-            if part:
-                if not all(char in validChars for char in part):
-                    return False
+            if part:  # Solo validar partes no vacias
+                for char in part:
+                    if char not in validChars:
+                        return False
         return True
     
     def normalizeValue(self):
