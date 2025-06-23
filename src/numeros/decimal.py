@@ -1,138 +1,110 @@
-from numeros.Number import Number
-from utilidades.NumberValidator import isValidDecimal
-from utilidades.NumberNormalizer import normalizeDecimal
-from errores.CustomExceptions import InvalidNumberFormatException
+from numeros.numero import Number
+from utilidades.normalizador import normalizeDecimal
+from errores.tiposErrores import InvalidNumberFormatError
 
 class Decimal(Number):
-    def __init__(self, value: str):
+    def __init__(self, valorEntrada: str):
         """
-        Inicializa un número decimal
+        Representa un número decimal con validación, normalización y análisis de cifras significativas.
         
         Args:
-            value: Cadena que representa el número decimal
+            valorEntrada: Cadena que representa el número decimal
             
         Raises:
-            InvalidNumberFormatException: Si el formato no es válido
+            InvalidNumberFormatError: Si el formato no es válido
         """
-        # Normalizar comas a puntos y quitar espacios
-        processedValue = value.replace(',', '.').replace(' ', '')
-        super().__init__(processedValue)
+        valorProcesado = valorEntrada.replace(',', '.').replace(' ', '')
+        super().__init__(valorProcesado)
     
-    def determineBase(self) -> int:
-        """
-        Determina la base numérica (10 para decimal)
-        
-        Returns:
-            10
-        """
+    def determinarBase(self) -> int:
         return 10
     
-    def isValid(self, value: str) -> bool:
+    def esValido(self, valor: str) -> bool:
         """
-        Valida si el valor es un número decimal válido
+        Valida formato decimal (dígitos, signo opcional, punto decimal opcional).
         
         Args:
-            value: Valor a validar
+            valor: Cadena a validar
             
         Returns:
             True si es válido, False en caso contrario
         """
-        return isValidDecimal(value)
+        # Patrón: [signo]dígitos[.dígitos]
+        if valor.startswith('-') or valor.startswith('+'):
+            valor = valor[1:]
+        
+        partes = valor.split('.')
+        if len(partes) > 2:
+            return False  # Múltiples puntos decimales
+        
+        # Todas las partes deben ser dígitos
+        return all(parte.isdigit() for parte in partes if parte)
     
-    def normalize(self):
-        """
-        Convierte el número a notación científica decimal
-        Ejemplo: "123.45" -> "1.2345 × 10^2"
-        """
-        self.normalizedForm = normalizeDecimal(self.originalValue)
+    def normalizar(self):
+        """Convierte a notación científica decimal"""
+        self.formaNormalizada = normalizeDecimal(self.valorOriginal)
     
-    def countSignificantDigits(self):
+    def contarCifrasSignificativas(self):
         """
-        Calcula la cantidad de cifras significativas según reglas matemáticas:
-        - Los ceros a la izquierda no son significativos
-        - Los ceros entre dígitos o a la derecha son significativos
-        - Los ceros finales después del punto son significativos
+        Calcula cifras significativas según reglas:
+        - Ceros iniciales no significativos
+        - Ceros finales después del punto son significativos
+        - Ceros entre dígitos significativos
         """
-        value = self.originalValue
+        valor = self.valorOriginal
         
         # Manejar signo
-        if value.startswith('-') or value.startswith('+'):
-            value = value[1:]
+        if valor.startswith('-') or valor.startswith('+'):
+            valor = valor[1:]
         
         # Caso especial: cero
-        if all(c in '0.,' for c in value):
-            self.significantDigits = 1
+        if valor.replace('0', '').replace('.', '') == '':
+            self.cifrasSignificativas = 1
             return
         
-        # Dividir en parte entera y decimal
-        parts = value.split('.')
-        integerPart = parts[0].lstrip('0')  # Quitar ceros a la izquierda
+        partes = valor.split('.')
+        parteEntera = partes[0].lstrip('0')
         
-        if len(parts) > 1:
-            decimalPart = parts[1].rstrip('0')  # Quitar ceros a la derecha
+        if len(partes) > 1:
+            parteDecimal = partes[1].rstrip('0')
         else:
-            decimalPart = ""
+            parteDecimal = ""
         
-        # Contar cifras significativas
-        if integerPart:
-            self.significantDigits = len(integerPart) + len(decimalPart)
+        if parteEntera:
+            self.cifrasSignificativas = len(parteEntera) + len(parteDecimal)
         else:
-            # Buscar primer dígito no cero en decimal
-            for i, char in enumerate(decimalPart):
+            # Contar desde primer dígito no cero en decimal
+            for i, char in enumerate(parteDecimal):
                 if char != '0':
-                    self.significantDigits = len(decimalPart) - i
+                    self.cifrasSignificativas = len(parteDecimal) - i
                     return
-            self.significantDigits = 1
+            self.cifrasSignificativas = 1
     
-    def determineSupportedOperations(self):
-        """
-        Determina las operaciones elementales posibles
-        Los números decimales soportan todas las operaciones básicas
-        """
-        self.supportedOperations = ['+', '-', '*', '/']
+    def determinarOperacionesSoportadas(self):
+        """Decimales soportan todas las operaciones básicas"""
+        self.operacionesSoportadas = ['+', '-', '*', '/']
     
-    def toDecimal(self) -> float:
-        """
-        Convierte el número decimal a su valor flotante
-        
-        Returns:
-            Valor numérico en punto flotante
-        """
-        # Manejar signo
-        sign = 1
-        if self.originalValue.startswith('-'):
-            sign = -1
-            value = self.originalValue[1:]
-        elif self.originalValue.startswith('+'):
-            value = self.originalValue[1:]
-        else:
-            value = self.originalValue
-        
-        # Convertir a flotante
-        try:
-            return sign * float(value)
-        except ValueError:
-            # Manejar casos especiales de formato
-            value = value.replace(',', '.')
-            return sign * float(value)
+    def convertirADecimal(self) -> float:
+        """Convierte a valor flotante decimal"""
+        return float(self.valorOriginal.replace(',', '.'))
     
-    def getOriginalValue(self) -> str:
-        return self.originalValue
+    def obtenerValorOriginal(self) -> str:
+        return self.valorOriginal
     
-    def getNormalizedForm(self) -> str:
-        return self.normalizedForm
+    def obtenerFormaNormalizada(self) -> str:
+        return self.formaNormalizada
     
-    def getSignificantDigitCount(self) -> int:
-        return self.significantDigits
+    def obtenerCantidadCifrasSignificativas(self) -> int:
+        return self.cifrasSignificativas
     
-    def getSupportedOperations(self) -> list:
-        return self.supportedOperations
+    def obtenerOperacionesSoportadas(self) -> list:
+        return self.operacionesSoportadas
     
-    def getBase(self) -> int:
+    def obtenerBase(self) -> int:
         return self.base
     
     def __str__(self) -> str:
-        return (f"Decimal: {self.originalValue} | "
-                f"Normalizado: {self.normalizedForm} | "
-                f"Cifras: {self.significantDigits} | "
-                f"Operaciones: {''.join(self.supportedOperations)}")
+        return (f"Decimal: {self.valorOriginal} | "
+                f"Normalizado: {self.formaNormalizada} | "
+                f"Cifras: {self.cifrasSignificativas} | "
+                f"Operaciones: {''.join(self.operacionesSoportadas)}")

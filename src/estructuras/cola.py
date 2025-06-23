@@ -1,35 +1,33 @@
-from listaEnlazada import LinkedList  # Asumiendo que ListaEnlazada se renombró a LinkedList
-
-class Node:
-    """Nodo para una lista enlazada"""
-    def __init__(self, data):
-        self.data = data
-        self.next = None
+from estructuras.listaEnlazada import LinkedList
 
 class Queue:
     def __init__(self):
-        self.dataList = LinkedList()
+        """
+        Implementación de cola FIFO usando lista enlazada propia.
+        Cumple con requisitos de implementación desde cero.
+        """
+        self.queueData = LinkedList()
         self.lastNode = None
     
-    def enqueue(self, element):
+    def addElementToQueue(self, elementData):
         """
-        Agrega un elemento al final de la cola
+        Agrega un elemento al final de la cola.
         
         Args:
-            element: Elemento a agregar
+            elementData: Dato a encolar
         """
-        new_node = Node(element)
-        if not self.dataList.head:
-            self.dataList.head = new_node
-            self.lastNode = new_node
+        newNode = LinkedList.Node(elementData)
+        if self.queueData.isEmpty():
+            self.queueData.head = newNode
+            self.lastNode = newNode
         else:
-            self.lastNode.next = new_node
-            self.lastNode = new_node
-        self.dataList.length += 1
+            self.lastNode.next = newNode
+            self.lastNode = newNode
+        self.queueData.length += 1
     
-    def dequeue(self):
+    def removeElementFromQueue(self):
         """
-        Elimina y devuelve el elemento al frente de la cola
+        Remueve y devuelve el elemento del frente de la cola.
         
         Returns:
             Elemento removido
@@ -37,29 +35,47 @@ class Queue:
         Raises:
             IndexError: Si la cola está vacía
         """
-        if self.isEmpty():
-            raise IndexError("Cola vacía")
-        data = self.dataList.head.data
-        self.dataList.head = self.dataList.head.next
-        self.dataList.length -= 1
-        if self.isEmpty():
+        if self.isQueueEmpty():
+            raise IndexError("Operación inválida: cola vacía")
+        
+        elementData = self.queueData.head.data
+        self.queueData.head = self.queueData.head.next
+        self.queueData.length -= 1
+        
+        if self.isQueueEmpty():
             self.lastNode = None
-        return data
+            
+        return elementData
     
-    def isEmpty(self):
+    def isQueueEmpty(self):
         """
-        Verifica si la cola está vacía
+        Verifica si la cola contiene elementos.
         
         Returns:
-            bool: True si está vacía, False de lo contrario
+            True si está vacía, False de lo contrario
         """
-        return self.dataList.length == 0
+        return self.queueData.length == 0
     
-    def front(self):
+    def getFirstElementInQueue(self):
         """
-        Obtiene el elemento al frente de la cola sin eliminarlo
+        Obtiene el elemento al frente de la cola sin removerlo.
         
         Returns:
-            Elemento al frente o None si está vacía
+            Elemento en el frente o None si está vacía
         """
-        return self.dataList.head.data if not self.isEmpty() else None
+        return self.queueData.head.data if not self.isQueueEmpty() else None
+    
+    def getQueueSize(self):
+        """
+        Devuelve el número de elementos en la cola.
+        
+        Returns:
+            Cantidad de elementos
+        """
+        return self.queueData.length
+    
+    def clearQueue(self):
+        """Vacía completamente la cola"""
+        self.queueData.head = None
+        self.lastNode = None
+        self.queueData.length = 0

@@ -1,29 +1,33 @@
 """
 Clase base abstracta para representaciones numéricas
-Define la interfaz común para Binario, Decimal y Hexadecimal
+Define interfaz común para Binary, Decimal y Hexadecimal
+Cumple con estándar camelCase en inglés y comentarios en español
 """
 
 from abc import ABC, abstractmethod
-from errores.CustomExceptions import InvalidNumberFormatException
+from errores.tiposErrores import InvalidNumberFormatException
 
 class Number(ABC):
-    def __init__(self, value: str):
+    def __init__(self, inputValue: str):
         """
-        Inicializa un número con su valor original
+        Inicializa un número con su valor original y procesa sus propiedades
         
         Args:
-            value: Valor numérico en cadena
+            inputValue: Valor numérico en formato cadena
+            
+        Raises:
+            InvalidNumberFormatException: Si el formato es inválido
         """
-        if not self.isValid(value):
-            raise InvalidNumberFormatException(f"Formato inválido: {value}")
+        if not self.isValid(inputValue):
+            raise InvalidNumberFormatException(f"Formato inválido: {inputValue}")
         
-        self.originalValue = value
+        self.originalValue = inputValue
         self.normalizedForm = ""
         self.significantDigits = 0
         self.supportedOperations = []
-        self.base = self.determineBase()
+        self.numericBase = self.determineBase()
         
-        self.normalize()
+        self.normalizeValue()
         self.countSignificantDigits()
         self.determineSupportedOperations()
     
@@ -51,7 +55,7 @@ class Number(ABC):
         pass
     
     @abstractmethod
-    def normalize(self):
+    def normalizeValue(self):
         """
         Convierte el número a su forma normalizada (notación científica)
         """
@@ -72,12 +76,12 @@ class Number(ABC):
         pass
     
     @abstractmethod
-    def toDecimal(self) -> float:
+    def convertToDecimal(self) -> float:
         """
         Convierte el número a su equivalente decimal
         
         Returns:
-            Valor decimal
+            Valor decimal en punto flotante
         """
         pass
     
@@ -86,25 +90,25 @@ class Number(ABC):
         Devuelve el valor original del número
         
         Returns:
-            Valor original
+            Valor original en formato cadena
         """
         return self.originalValue
     
     def getNormalizedForm(self) -> str:
         """
-        Devuelve la forma normalizada
+        Devuelve la representación normalizada
         
         Returns:
-            Representación en notación científica
+            Notación científica del número
         """
         return self.normalizedForm
     
     def getSignificantDigitCount(self) -> int:
         """
-        Devuelve la cantidad de cifras significativas
+        Devuelve el número de cifras significativas
         
         Returns:
-            Número de cifras significativas
+            Cantidad de cifras significativas
         """
         return self.significantDigits
     
@@ -113,28 +117,28 @@ class Number(ABC):
         Devuelve las operaciones soportadas
         
         Returns:
-            Lista de operaciones (+, -, *, /)
+            Lista de operaciones elementales (+, -, *, /)
         """
         return self.supportedOperations
     
-    def getBase(self) -> int:
+    def getNumericBase(self) -> int:
         """
         Devuelve la base numérica
         
         Returns:
-            Base (2, 10, 16)
+            Base del sistema numérico (2, 10, 16)
         """
-        return self.base
+        return self.numericBase
     
     def __str__(self) -> str:
         """
-        Representación en cadena del número
+        Representación legible del número
         
         Returns:
-            Cadena descriptiva
+            Cadena descriptiva con propiedades clave
         """
-        return (f"Valor: {self.originalValue} | "
-                f"Base: {self.base} | "
-                f"Normalizado: {self.normalizedForm} | "
-                f"Cifras Signif: {self.significantDigits} | "
-                f"Operaciones: {''.join(self.supportedOperations)}")
+        return (f"Original: {self.originalValue} | "
+                f"Base: {self.numericBase} | "
+                f"Normalized: {self.normalizedForm} | "
+                f"Significant Digits: {self.significantDigits} | "
+                f"Operations: {''.join(self.supportedOperations)}")

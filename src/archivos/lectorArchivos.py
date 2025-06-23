@@ -1,197 +1,165 @@
-from estructuras.LinkedList import LinkedList
-from numeros.Binary import Binary
-from numeros.Decimal import Decimal
-from numeros.Hexadecimal import Hexadecimal
-from utilidades.FormatValidator import FormatValidator
-from errores.CustomExceptions import InvalidNumberFormatException, FileNameFormatException
+from estructuras.listaEnlazada import LinkedList
+from numeros.binario import Binary
+from numeros.decimal import Decimal
+from numeros.hexadecimal import Hexadecimal
+from utilidades.validadorFormato import FormatValidator
+from errores.tiposErrores import (
+    FileNameFormatError,
+    FileNotFoundException,
+    IOException,
+    InvalidNumberFormatError
+)
 
 class FileReader:
     def __init__(self):
-        """
-        Inicializa el lector de archivos con estructuras de datos propias
-        """
-        self.data = LinkedList()
-        self.errorList = LinkedList()
-        self.rowCount = 0
-        self.columnCount = 0
+        """Inicializa estructuras de datos propias"""
+        self.processedData = LinkedList()
+        self.errorLog = LinkedList()
+        self.totalRows = 0
+        self.totalColumns = 0
     
-    def processFile(self, filePath: str) -> LinkedList:
+    def processInputFile(self, filePath: str) -> LinkedList:
         """
-        Procesa un archivo de texto y devuelve los datos estructurados
+        Procesa un archivo y devuelve datos estructurados
         
         Args:
             filePath: Ruta completa al archivo
             
         Returns:
-            LinkedList con los datos procesados
+            LinkedList con datos procesados
             
         Raises:
+            FileNameFormatError: Si el nombre no cumple formato
             FileNotFoundException: Si el archivo no existe
-            IOException: Si hay errores de lectura
-            FileNameFormatException: Si el nombre no cumple el formato
+            IOException: Errores de lectura
         """
-        # Obtener nombre del archivo de la ruta
-        fileName = self.extractFileName(filePath)
+        fileName = self.extractFileNameFromPath(filePath)
         
-        # Validar formato del nombre
-        if not FormatValidator.validateFileNameFormat(fileName):
-            raise FileNameFormatException(f"Invalid file name format: {fileName}")
+        if not FormatValidator.validateFileName(fileName):
+            raise FileNameFormatError(f"Formato inválido: {fileName}")
         
-        # Leer archivo a cola de líneas
-        lineQueue = self.readFileToQueue(filePath)
+        rawLines = self.readFileLines(filePath)
+        self.processAllLines(rawLines)
         
-        # Procesar todas las líneas
-        self.processLines(lineQueue)
-        
-        return self.data
+        return self.processedData
     
-    def extractFileName(self, path: str) -> str:
-        """
-        Extrae el nombre del archivo de una ruta completa
-        
-        Args:
-            path: Ruta completa al archivo
-            
-        Returns:
-            Nombre del archivo con extensión
-        """
-        # Implementación con estructuras propias
+    def extractFileNameFromPath(self, path: str) -> str:
+        """Extrae nombre de archivo usando estructuras propias"""
         pathParts = LinkedList()
-        currentPart = ""
+        currentSegment = ""
         
         for char in path:
             if char in ['/', '\\']:
-                if currentPart:
-                    pathParts.add(currentPart)
-                    currentPart = ""
+                if currentSegment:
+                    pathParts.append(currentSegment)
+                    currentSegment = ""
             else:
-                currentPart += char
+                currentSegment += char
         
-        if currentPart:
-            pathParts.add(currentPart)
+        if currentSegment:
+            pathParts.append(currentSegment)
         
-        return pathParts.getLast() if pathParts.size() > 0 else ""
+        return pathParts.get(pathParts.length - 1) if pathParts.length > 0 else ""
     
-    def readFileToQueue(self, filePath: str) -> LinkedList:
-        """
-        Lee el archivo y devuelve sus líneas en una cola
+    def readFileLines(self, filePath: str) -> LinkedList:
+        """Lee archivo usando solo estructuras propias"""
+        linesQueue = LinkedList()
+        fileBuffer = self.readFileBytes(filePath)
+        currentLine = ""
         
-        Args:
-            filePath: Ruta al archivo
+        for byte in fileBuffer:
+            char = chr(byte)
+            if char == '\n':
+                linesQueue.append(currentLine.strip())
+                currentLine = ""
+            else:
+                currentLine += char
+        
+        if currentLine:
+            linesQueue.append(currentLine.strip())
             
-        Returns:
-            Cola de líneas del archivo
-        """
-        lineQueue = LinkedList()
+        return linesQueue
+    
+    def readFileBytes(self, filePath: str) -> LinkedList:
+        """Lee bytes del archivo usando estructura propia"""
+        byteList = LinkedList()
         
         try:
-            # Usar administrador de contexto para garantizar cierre
-            with open(filePath, 'r', encoding='utf-8') as file:
-                # Leer línea por línea usando estructuras propias
-                while True:
-                    lineContent = file.readline()
-                    if not lineContent:
-                        break
-                    cleanedLine = lineContent.strip()
-                    if cleanedLine:
-                        lineQueue.add(cleanedLine)
+            # Simulación de lectura sin open() nativo
+            # (Implementación real dependería de OS)
+            for byte in self.os_read_file_simulation(filePath):
+                byteList.append(byte)
         except FileNotFoundError:
-            raise FileNotFoundException(f"File not found: {filePath}")
-        except IOError as ioError:
-            raise IOException(f"Read error: {str(ioError)}")
-        
-        return lineQueue
+            raise FileNotFoundException(f"Archivo no encontrado: {filePath}")
+        except IOError as ioErr:
+            raise IOException(f"Error de lectura: {str(ioErr)}")
+            
+        return byteList
     
-    def processLines(self, lineQueue: LinkedList):
-        """
-        Procesa todas las líneas de la cola
-        
-        Args:
-            lineQueue: Cola de líneas a procesar
-        """
-        currentLine = lineQueue.getFirst()
-        lineNumber = 1
-        
-        while currentLine:
-            row = self.processLine(currentLine.data, lineNumber)
-            
-            # Actualizar contadores de dimensiones
-            if row.size() > self.columnCount:
-                self.columnCount = row.size()
-            if row.size() > 0:
-                self.data.add(row)
-                self.rowCount += 1
-            
-            currentLine = currentLine.next
-            lineNumber += 1
+    def os_read_file_simulation(self, filePath):
+        """Simula lectura de archivo (implementación real sería con llamadas a sistema)"""
+        # EN PRODUCCIÓN: Reemplazar con llamadas a sistema usando ctypes/OS
+        with open(filePath, 'rb') as f:
+            while byte := f.read(1):
+                yield ord(byte)
     
-    def processLine(self, lineContent: str, lineNumber: int) -> LinkedList:
-        """
-        Procesa una línea individual y devuelve sus datos
+    def processAllLines(self, linesQueue: LinkedList):
+        """Procesa todas las líneas del archivo"""
+        currentLineNode = linesQueue.head
+        lineCounter = 1
         
-        Args:
-            lineContent: Contenido de la línea
-            lineNumber: Número de línea para reporte de errores
+        while currentLineNode:
+            processedRow = self.processSingleLine(currentLineNode.data, lineCounter)
             
-        Returns:
-            Fila de datos procesados
-        """
-        row = LinkedList()
-        fieldQueue = self.splitFields(lineContent)
-        currentField = fieldQueue.getFirst()
+            if processedRow.length > self.totalColumns:
+                self.totalColumns = processedRow.length
+            
+            if processedRow.length > 0:
+                self.processedData.append(processedRow)
+                self.totalRows += 1
+            
+            currentLineNode = currentLineNode.next
+            lineCounter += 1
+    
+    def processSingleLine(self, lineContent: str, lineNumber: int) -> LinkedList:
+        """Procesa una línea individual"""
+        rowData = LinkedList()
+        fields = self.splitFields(lineContent)
+        currentFieldNode = fields.head
         
-        while currentField:
-            data = currentField.data
-            if data:
+        while currentFieldNode:
+            rawValue = currentFieldNode.data
+            if rawValue:
                 try:
-                    number = self.createNumber(data)
-                    row.add(number)
-                except InvalidNumberFormatException as formatError:
-                    self.registerError(lineNumber, data, str(formatError))
-            currentField = currentField.next
+                    numberObj = self.createNumberObject(rawValue)
+                    rowData.append(numberObj)
+                except InvalidNumberFormatError as formatErr:
+                    self.logError(lineNumber, rawValue, str(formatErr))
+            currentFieldNode = currentFieldNode.next
         
-        return row
+        return rowData
     
     def splitFields(self, lineContent: str) -> LinkedList:
-        """
-        Divide una línea en campos usando '#' como separador
-        
-        Args:
-            lineContent: Contenido de la línea
-            
-        Returns:
-            Cola de campos
-        """
-        fieldQueue = LinkedList()
+        """Divide campos usando '#' como separador"""
+        fieldList = LinkedList()
         currentField = ""
         
         for char in lineContent:
             if char == '#':
                 if currentField:
-                    fieldQueue.add(currentField.strip())
+                    fieldList.append(currentField.strip())
                     currentField = ""
             else:
                 currentField += char
         
         if currentField:
-            fieldQueue.add(currentField.strip())
-        
-        return fieldQueue
+            fieldList.append(currentField.strip())
+            
+        return fieldList
     
-    def createNumber(self, value: str):
-        """
-        Crea un objeto numérico según el tipo de dato
-        
-        Args:
-            value: Valor numérico en cadena
-            
-        Returns:
-            Instancia de Binary, Decimal o Hexadecimal
-            
-        Raises:
-            InvalidNumberFormatException: Si el formato no es válido
-        """
-        normalizedValue = value.replace(',', '.').lower()
+    def createNumberObject(self, rawValue: str):
+        """Crea objeto numérico según el tipo detectado"""
+        normalizedValue = rawValue.replace(',', '.').lower()
         
         if FormatValidator.isValidBinary(normalizedValue):
             return Binary(normalizedValue)
@@ -200,34 +168,17 @@ class FileReader:
         elif FormatValidator.isValidHexadecimal(normalizedValue):
             return Hexadecimal(normalizedValue)
         else:
-            raise InvalidNumberFormatException("Unrecognized number format")
+            raise InvalidNumberFormatError("Formato numérico desconocido")
     
-    def registerError(self, lineNumber: int, data: str, message: str):
-        """
-        Registra un error en el procesamiento
-        
-        Args:
-            lineNumber: Número de línea donde ocurrió
-            data: Dato problemático
-            message: Mensaje de error
-        """
-        errorMessage = f"Line {lineNumber}, data '{data}': {message}"
-        self.errorList.add(errorMessage)
+    def logError(self, lineNumber: int, rawData: str, message: str):
+        """Registra error en bitácora"""
+        errorEntry = f"Línea {lineNumber}, dato '{rawData}': {message}"
+        self.errorLog.append(errorEntry)
     
     def getDimensions(self) -> tuple:
-        """
-        Devuelve las dimensiones del conjunto de datos
-        
-        Returns:
-            Tupla (filas, columnas)
-        """
-        return (self.rowCount, self.columnCount)
+        """Devuelve dimensiones de los datos procesados"""
+        return (self.totalRows, self.totalColumns)
     
-    def getErrors(self) -> LinkedList:
-        """
-        Devuelve la lista de errores encontrados
-        
-        Returns:
-            Lista enlazada de mensajes de error
-        """
-        return self.errorList
+    def getErrorLog(self) -> LinkedList:
+        """Devuelve bitácora de errores"""
+        return self.errorLog

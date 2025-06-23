@@ -1,102 +1,93 @@
-"""
-Implementación optimizada de una estructura de pila (LIFO) usando nodos enlazados
-Cumple con los requisitos de usar estructuras propias y nomenclatura camelCase
-"""
+from estructuras.listaEnlazada import LinkedList
 
-class Node:
-    def __init__(self, data):
-        """
-        Nodo básico para la pila
-        
-        Args:
-            data: Dato a almacenar en el nodo
-        """
-        self.data = data
-        self.next = None
-
+"""
+Implementación optimizada de pila (LIFO) usando lista enlazada propia
+Cumple con requisitos de implementación desde cero y nomenclatura descriptiva
+"""
 
 class Stack:
     def __init__(self):
         """
-        Inicializa una pila vacía
+        Inicializa una pila vacía usando lista enlazada propia.
         """
-        self.top = None  # Referencia al tope de la pila
-        self.size = 0    # Contador de elementos
+        self.stackData = LinkedList()
     
-    def push(self, element):
+    def addElementToStack(self, elementData):
         """
-        Agrega un elemento al tope de la pila
+        Agrega un elemento en el tope de la pila.
         
         Args:
-            element: Elemento a agregar
+            elementData: Dato a apilar
         """
-        new_node = Node(element)
-        new_node.next = self.top
-        self.top = new_node
-        self.size += 1
+        # Crear nuevo nodo y actualizar referencias
+        newNode = LinkedList.Node(elementData)
+        newNode.next = self.stackData.head
+        self.stackData.head = newNode
+        self.stackData.length += 1
     
-    def pop(self):
+    def removeElementFromStack(self):
         """
-        Remueve y devuelve el elemento en el tope de la pila
+        Remueve y devuelve el elemento del tope de la pila.
         
         Returns:
-            Elemento en el tope
+            Elemento removido
             
         Raises:
             IndexError: Si la pila está vacía
         """
-        if self.isEmpty():
-            raise IndexError("Stack is empty")
+        if self.isStackEmpty():
+            raise IndexError("Operación inválida: pila vacía")
         
-        data = self.top.data
-        self.top = self.top.next
-        self.size -= 1
-        return data
+        elementData = self.stackData.head.data
+        self.stackData.head = self.stackData.head.next
+        self.stackData.length -= 1
+        
+        return elementData
     
-    def peek(self):
+    def getTopElementFromStack(self):
         """
-        Devuelve el elemento en el tope sin removerlo
+        Obtiene el elemento en el tope de la pila sin removerlo.
         
         Returns:
             Elemento en el tope o None si está vacía
         """
-        return self.top.data if self.top else None
+        return self.stackData.head.data if not self.isStackEmpty() else None
     
-    def isEmpty(self):
+    def isStackEmpty(self):
         """
-        Verifica si la pila está vacía
+        Verifica si la pila contiene elementos.
         
         Returns:
-            True si está vacía, False en caso contrario
+            True si está vacía, False de lo contrario
         """
-        return self.size == 0
+        return self.stackData.length == 0
     
-    def getSize(self):
+    def getStackSize(self):
         """
-        Devuelve el número de elementos en la pila
+        Devuelve el número de elementos en la pila.
         
         Returns:
-            Número de elementos
+            Cantidad de elementos
         """
-        return self.size
+        return self.stackData.length
     
-    def clear(self):
-        """
-        Vacía completamente la pila
-        """
-        self.top = None
-        self.size = 0
+    def clearStack(self):
+        """Vacía completamente la pila"""
+        self.stackData.head = None
+        self.stackData.length = 0
     
     def __str__(self):
         """
-        Representación en cadena de la pila
+        Representación en cadena de la pila (solo para depuración).
         
         Returns:
-            Cadena con los elementos de la pila
+            Cadena descriptiva del estado de la pila
         """
-        elements = []
-        current = self.top
-        while current:
-            elements.append(str(current.data))
-            current = current.next
-        return "Stack: [" + " <- ".join(elements) + "]" if elements else "Empty Stack"
+        elements = LinkedList()
+        currentNode = self.stackData.head
+        
+        while currentNode:
+            elements.append(str(currentNode.data))
+            currentNode = currentNode.next
+        
+        return "Stack: [" + " <- ".join(elements) if elements.length > 0 else "Pila Vacía"

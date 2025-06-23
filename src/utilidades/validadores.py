@@ -1,59 +1,103 @@
 from errores.tiposErrores import (
     DivisionByZeroError,
     MathematicalIndeterminacyError,
-    InvalidNumberFormatError,  
-    MatrixDimensionsError      
+    InvalidNumberFormatError,
+    MatrixDimensionsError
 )
 
-def validateDivision(denominator):
-    "Valida que el denominador no sea cero"
-    if denominator == 0:
-        raise DivisionByZeroError("Division por cero no permitida")
+def validateDivisionDenominator(denominatorValue: float):
+    """
+    Valida que el denominador de una división no sea cero.
+    
+    Args:
+        denominatorValue: Valor del denominador a validar
+        
+    Raises:
+        DivisionByZeroError: Si el denominador es cero
+    """
+    if denominatorValue == 0:
+        raise DivisionByZeroError("Operación inválida: división por cero")
 
-def validateNumberFormat(value, numberSystem):
-    "Valida el formato de un numero segun su sistema"
+def validateNumberFormat(inputValue: str, numberSystem: str):
+    """
+    Valida el formato de un número según el sistema numérico especificado.
+    
+    Args:
+        inputValue: Valor a validar
+        numberSystem: Sistema numérico ('Binario', 'Decimal', 'Hexadecimal')
+        
+    Raises:
+        InvalidNumberFormatError: Si el formato no coincide con el sistema
+    """
     if numberSystem == 'Binario':
-        if not all(char in '01.' for char in value):
-            raise InvalidNumberFormatError(f"Valor '{value}' no es binario valido")
+        if not all(char in '01.' for char in inputValue):
+            raise InvalidNumberFormatError(f"Valor '{inputValue}' no es binario válido")
     
     elif numberSystem == 'Decimal':
         try:
-            float(value.replace(',', '.'))
+            # Convertir considerando comas como puntos decimales
+            float(inputValue.replace(',', '.'))
         except ValueError:
-            raise InvalidNumberFormatError(f"Valor '{value}' no es decimal valido")
+            raise InvalidNumberFormatError(f"Valor '{inputValue}' no es decimal válido")
     
     elif numberSystem == 'Hexadecimal':
-        if not all(char in '0123456789abcdefABCDEF.' for char in value):
-            raise InvalidNumberFormatError(f"Valor '{value}' no es hexadecimal valido")
+        validChars = '0123456789abcdefABCDEF.'
+        if not all(char in validChars for char in inputValue):
+            raise InvalidNumberFormatError(f"Valor '{inputValue}' no es hexadecimal válido")
     
     else:
-        raise ValueError(f"Sistema numerico no reconocido: {numberSystem}")
+        raise ValueError(f"Sistema numérico no reconocido: {numberSystem}")
 
-def validateOperation(operator, operands):
-    "Valida operaciones matematicas para evitar indeterminaciones"
-    if operator == '/':
-        validateDivision(operands[1])
+def validateMathematicalOperation(operationSymbol: str, operandValues: list):
+    """
+    Valida una operación matemática para evitar indeterminaciones.
     
-    elif operator == '√':
-        if operands[0] < 0:
-            raise MathematicalIndeterminacyError("Raiz cuadrada de numero negativo")
+    Args:
+        operationSymbol: Símbolo de la operación (+, -, *, /, √, ln)
+        operandValues: Lista de operandos involucrados
+        
+    Raises:
+        MathematicalIndeterminacyError: Si se detecta una operación indeterminada
+        DivisionByZeroError: Si se intenta dividir por cero
+    """
+    if operationSymbol == '/':
+        validateDivisionDenominator(operandValues[1])
     
-    elif operator == 'ln':
-        if operands[0] <= 0:
-            raise MathematicalIndeterminacyError("Logaritmo natural de numero no positivo")
+    elif operationSymbol == '√':
+        if operandValues[0] < 0:
+            raise MathematicalIndeterminacyError("Operación inválida: raíz cuadrada de número negativo")
+    
+    elif operationSymbol == 'ln':
+        if operandValues[0] <= 0:
+            raise MathematicalIndeterminacyError("Operación inválida: logaritmo natural de número no positivo")
 
-def validateMatrixDimensions(matrix1, matrix2, operation):
-    "Valida que las dimensiones de las matrices sean compatibles"
-    if operation == 'suma' or operation == 'resta':
-        if matrix1.rows != matrix2.rows or matrix1.columns != matrix2.columns:
+def validateMatrixDimensionsForOperation(matrixA, matrixB, operationType: str):
+    """
+    Valida que las dimensiones de dos matrices sean compatibles para la operación.
+    
+    Args:
+        matrixA: Primera matriz (debe tener atributos rows y columns)
+        matrixB: Segunda matriz (debe tener atributos rows y columns)
+        operationType: Tipo de operación ('suma', 'resta', 'producto')
+        
+    Raises:
+        MatrixDimensionsError: Si las dimensiones son incompatibles
+        ValueError: Si las matrices están vacías
+    """
+    # Validar matrices no vacías
+    if matrixA.rows == 0 or matrixA.columns == 0 or matrixB.rows == 0 or matrixB.columns == 0:
+        raise MatrixDimensionsError("Operación inválida: matrices vacías")
+    
+    if operationType in ['suma', 'resta']:
+        if matrixA.rows != matrixB.rows or matrixA.columns != matrixB.columns:
             raise MatrixDimensionsError(
-                f"Dimensiones incompatibles para {operation}: "
-                f"{matrix1.rows}x{matrix1.columns} vs {matrix2.rows}x{matrix2.columns}"
+                f"Dimensiones incompatibles para {operationType}: "
+                f"{matrixA.rows}x{matrixA.columns} vs {matrixB.rows}x{matrixB.columns}"
             )
     
-    elif operation == 'producto':
-        if matrix1.columns != matrix2.rows:
+    elif operationType == 'producto':
+        if matrixA.columns != matrixB.rows:
             raise MatrixDimensionsError(
                 f"Dimensiones incompatibles para producto: "
-                f"{matrix1.rows}x{matrix1.columns} vs {matrix2.rows}x{matrix2.columns}"
+                f"{matrixA.rows}x{matrixA.columns} vs {matrixB.rows}x{matrixB.columns}"
             )
