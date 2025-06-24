@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-from errores.tiposErrores import InvalidNumberFormatException
+from errores.tiposErrores import InvalidNumberFormatError
 
 class Number(ABC):
     def __init__(self, inputValue: str):
+        if type(inputValue).__name__ != 'str':
+            raise InvalidNumberFormatError("Tipo de entrada no valido")
         if not self.isValid(inputValue):
-            raise InvalidNumberFormatException(f"Formato invalido: {inputValue}")
+            raise InvalidNumberFormatError(f"Formato invalido: {inputValue}")
         
         self.originalValue = inputValue
         self.normalizedForm = ""
@@ -37,7 +39,7 @@ class Number(ABC):
         pass
     
     @abstractmethod
-    def convertToDecimal(self) -> float:
+    def convertToFloat(self) -> float:
         pass
     
     def getOriginalValue(self) -> str:
@@ -46,7 +48,7 @@ class Number(ABC):
     def getNormalizedForm(self) -> str:
         return self.normalizedForm
     
-    def getSignificantDigitCount(self) -> int:
+    def getSignificantDigitsCount(self) -> int:
         return self.significantDigits
     
     def getSupportedOperations(self) -> list:
@@ -58,6 +60,6 @@ class Number(ABC):
     def __str__(self) -> str:
         return (f"Original: {self.originalValue} | "
                 f"Base: {self.numericBase} | "
-                f"Normalized: {self.normalizedForm} | "
-                f"Significant Digits: {self.significantDigits} | "
-                f"Operations: {''.join(self.supportedOperations)}")
+                f"Normalizado: {self.normalizedForm} | "
+                f"Digitos Significativos: {self.significantDigits} | "
+                f"Operaciones: {''.join(self.supportedOperations)}")

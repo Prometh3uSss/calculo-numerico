@@ -1,6 +1,7 @@
 from numeros.numero import Number
 from utilidades.normalizador import normalizeHexadecimalNumber
 from errores.tiposErrores import InvalidNumberFormatError
+from core.tiposUtilidades import allElementsMeet  
 
 class Hexadecimal(Number):
     def __init__(self, inputValue: str):
@@ -11,25 +12,20 @@ class Hexadecimal(Number):
         return 16
     
     def isValid(self, value: str) -> bool:
-        # Permitir signo opcional
         if value.startswith('-') or value.startswith('+'):
             value = value[1:]
         
-        # Convertir a mayúsculas para validacion
         value = value.upper()
         
-        # Dividir en parte entera y fraccionaria
         parts = value.split('.')
-        if len(parts) > 2:  # Maximo un punto decimal
+        if len(parts) > 2:
             return False
         
         validChars = '0123456789ABCDEF'
-        # Validacion optimizada con terminacion temprana
         for part in parts:
-            if part:  # Solo validar partes no vacias
-                for char in part:
-                    if char not in validChars:
-                        return False
+            if part:
+                if not allElementsMeet(part, lambda char: char in validChars):
+                    return False
         return True
     
     def normalizeValue(self):
@@ -38,35 +34,30 @@ class Hexadecimal(Number):
     def countSignificantDigits(self):
         value = self.originalValue
         
-        # Manejar signo
         if value.startswith('-') or value.startswith('+'):
             value = value[1:]
         
-        # Caso especial: cero
-        if all(char in '0.' for char in value):
+        if allElementsMeet(value, lambda char: char in '0.,'):
             self.significantDigits = 1
             return
         
-        # Dividir en parte entera y fraccionaria
         parts = value.split('.')
         integerPart = parts[0].lstrip('0')
-        fractionalPart = parts[1] if len(parts) > 1 else ""
+        fractionalPart = parts[1].rstrip('0') if len(parts) > 1 else ""
         
-        # Combinar digitos significativos (sin ceros iniciales/finales)
         significantDigits = integerPart + fractionalPart
         significantDigits = significantDigits.lstrip('0')
         
-        if significantDigits == "":
-            self.significantDigits = 1  # Caso 0.000
+        if not significantDigits:
+            self.significantDigits = 1
         else:
             self.significantDigits = len(significantDigits)
     
     def determineSupportedOperations(self):
         self.supportedOperations = ['+', '-', '*']
         
-        # Permitir division solo si no es cero
         valueWithoutSign = self.originalValue.replace('-', '').replace('+', '')
-        if not all(char in '0.' for char in valueWithoutSign):
+        if not allElementsMeet(valueWithoutSign, lambda char: char in '0.,'):
             self.supportedOperations.append('/')
     
     def convertToFloat(self) -> float:
@@ -83,6 +74,23 @@ class Hexadecimal(Number):
         
         return sign * (integerValue + fractionalValue)
     
-    # Métodos de acceso (consistentes con clase base)
+    def getOriginalValue(self) -> str:
+        return self.originalValue
+    
+    def getNormalizedForm(self) -> str:
+        return self.normalizedForm
+    
     def getSignificantDigitsCount(self) -> int:
         return self.significantDigits
+    
+    def getSupportedOperations(self) -> list:
+        return self.supportedOperations
+    
+    def getBase(self) -> int:
+        return self.base
+    
+    def __str__(self) -> str:
+        return (f"Hexadecimal: {self.originalValue} | "
+                f"Normalizado: {self.normalizedForm} | "
+                f"Digitos Significativos: {self.significantDigits} | "
+                f"Operaciones: {''.join(self.supportedOperations)}")

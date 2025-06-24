@@ -1,8 +1,3 @@
-"""
-Punto de entrada principal del sistema de cálculo numérico
-Implementa el flujo completo usando estructuras propias y nomenclatura descriptiva
-"""
-
 import os
 import time
 from estructuras.listaEnlazada import LinkedList
@@ -12,38 +7,35 @@ from numeros.decimal import Decimal
 from numeros.binario import Binary
 from numeros.hexadecimal import Hexadecimal
 from errores.calculadoraErrores import ErrorCalculator
-from errores.tiposErrores import (  
-    FileProcessingException, 
+from errores.tiposErrores import (
+    FileProcessingException,
     FileNameFormatError,
     FileNotFoundException,
     IOException
 )
+from core.tiposUtilidades import isTypeInstance
+import numeros
 
 def mainExecution():
     try:
-        # 1. Configuración inicial
         dataDirectoryPath = os.path.join(os.getcwd(), 'data')
         outputDirectoryPath = os.path.join(os.getcwd(), 'output')
         
-        # 2. Preparar entorno
         setupProcessingEnvironment(outputDirectoryPath)
         
-        # 3. Inicializar componentes
         fileProcessor = FileReader()
         fileGenerator = FileGenerator(outputDirectoryPath)
         
-        # 4. Obtener archivos a procesar
         filesToProcess = getProcessableFiles(dataDirectoryPath)
         
         if filesToProcess.getListLength() == 0:
-            print("No se encontraron archivos validos para procesar en la carpeta 'data'")
+            print("No se encontraron archivos válidos para procesar en la carpeta 'data'")
             return
         
-        # 5. Procesar cada archivo
         processFileCollection(filesToProcess, fileProcessor, fileGenerator)
         
     except Exception as criticalError:
-        print(f"Error critico en la ejecución: {str(criticalError)}")
+        print(f"Error critico de ejecucion: {str(criticalError)}")
 
 def setupProcessingEnvironment(outputDirectory: str):
     if not os.path.exists(outputDirectory):
@@ -51,19 +43,18 @@ def setupProcessingEnvironment(outputDirectory: str):
             os.makedirs(outputDirectory)
             print(f"Directorio de salida creado: {outputDirectory}")
         except OSError as osError:
-            raise OSError(f"Error creando directorio: {str(osError)}")
+            raise OSError(f"Error al crear el directorio: {str(osError)}")
 
 def getProcessableFiles(directoryPath: str) -> LinkedList:
-    """Obtiene archivos .txt y .bin en el directorio"""
     fileList = LinkedList()
     
     try:
         for fileName in os.listdir(directoryPath):
-            if fileName.endswith('.txt') or fileName.endswith('.bin'):  # Cambio clave
+            if fileName.endswith('.txt') or fileName.endswith('.bin'):
                 fullPath = os.path.join(directoryPath, fileName)
                 fileList.addElementAtEnd(fullPath)
     except FileNotFoundError:
-        print(f"Advertencia: Carpeta 'data' no encontrada en {directoryPath}")
+        print(f"Advertencia: no se encontro la carpeta 'data' en {directoryPath}")
     
     return fileList
 
@@ -86,24 +77,19 @@ def processSingleInputFile(filePath: str, fileProcessor: FileReader, fileGenerat
         fileName = os.path.basename(filePath)
         
         printProcessingHeader(fileName)
-        
-        # 1. Leer y procesar archivo
+
         processedData = fileProcessor.processInputFile(filePath)
         rowCount, columnCount = fileProcessor.getDimensions()
-        print(f"Archivo procesado: {rowCount} filas x {columnCount} columnas")
+        print(f"File processed: {rowCount} rows x {columnCount} columns")
         
-        # 2. Calcular resultados numéricos
         analysisResults = LinkedList()
         calculateNumericalAnalysis(processedData, analysisResults)
         
-        # 3. Calcular errores
         calculateErrorMetrics(processedData, analysisResults)
         
-        # 4. Generar archivo de salida
         baseName = fileName.split('_')[0]
         outputFilePath = fileGenerator.generateOutputFile(baseName, analysisResults)
         
-        # 5. Mostrar estadisticas
         displayProcessingStatistics(startTime, outputFilePath, fileProcessor)
         
     except (FileNameFormatError, FileNotFoundException, IOException) as ioError:
@@ -144,21 +130,21 @@ def formatAnalysisResult(rowIndex: int, columnIndex: int, numberObject) -> str:
         operations = numberObject.getSupportedOperations()
         numberType = getNumberTypeDescription(numberObject)
         
-        return (f"Fila {rowIndex}, Col {columnIndex}: "
+        return (f"fila {rowIndex}, Col {columnIndex}: "
                 f"Valor: {numberObject.getOriginalValue()} | "
                 f"Sistema: {numberType} | "
                 f"Normalizado: {normalizedForm} | "
-                f"Cifras Significativas: {significantDigits} | "
-                f"Operaciones: {operations}")
+                f"Digitos significativos: {significantDigits} | "
+                f"Operations: {operations}")
     except Exception as formatError:
-        return f"Error formateando resultado: {str(formatError)}"
+        return f"Error al formatear el resultado: {str(formatError)}"
 
 def getNumberTypeDescription(numberObject) -> str:
-    if isinstance(numberObject, Binary):
-        return "Binario"
-    elif isinstance(numberObject, Decimal):
+    if isTypeInstance(numberObject, "Binary"):
+        return "Binary"
+    elif isTypeInstance(numberObject, "Decimal"):
         return "Decimal"
-    elif isinstance(numberObject, Hexadecimal):
+    elif isTypeInstance(numberObject, "Hexadecimal"):
         return "Hexadecimal"
     return "Desconocido"
 
@@ -167,7 +153,6 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
         return
     
     try:
-        # Obtener los primeros dos números válidos
         firstRow = processedData.headNode.elementData
         if firstRow.getListLength() < 2:
             return
@@ -175,14 +160,12 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
         firstNumber = firstRow.headNode.elementData
         secondNumber = firstRow.headNode.nextNode.elementData
         
-        # Calcular errores usando métodos estáticos
         exactValue = firstNumber.convertToFloat()
         approxValue = secondNumber.convertToFloat()
         
         absoluteError = ErrorCalculator.calculateAbsoluteError(exactValue, approxValue)
         relativeError = ErrorCalculator.calculateRelativeError(exactValue, approxValue)
         
-        # Usar 4 dígitos significativos como ejemplo
         roundingError = ErrorCalculator.calculateRoundingError(4)
         truncationError = ErrorCalculator.calculateTruncationError(4)
         
@@ -191,24 +174,25 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
             [absoluteError, absoluteError]
         )
         
-        resultContainer.addElementAtEnd("\n=== Resultados de Analisis de Errores ===")
+        # Add results
+        resultContainer.addElementAtEnd("\n=== Resultados del analisis de ===")
         resultContainer.addElementAtEnd(f"Comparacion: {firstNumber.getOriginalValue()} vs {secondNumber.getOriginalValue()}")
-        resultContainer.addElementAtEnd(f"Error Absoluto: {absoluteError}")
+        resultContainer.addElementAtEnd(f"Error Adsoluto: {absoluteError}")
         resultContainer.addElementAtEnd(f"Error Relativo: {relativeError}")
         resultContainer.addElementAtEnd(f"Error por Redondeo: {roundingError}")
-        resultContainer.addElementAtEnd(f"Error por Truncamiento: {truncationError}")
-        resultContainer.addElementAtEnd(f"Error por Propagacion: {propagationError}")
+        resultContainer.addElementAtEnd(f"Error por truncamiento: {truncationError}")
+        resultContainer.addElementAtEnd(f"Error por propagacion: {propagationError}")
         
     except Exception as generalError:
-        resultContainer.addElementAtEnd(f"Error en calculo de errores: {str(generalError)}")
+        resultContainer.addElementAtEnd(f"Error en el calculo de errores: {str(generalError)}")
 
 def displayProcessingStatistics(startTime: float, outputPath: str, fileProcessor: FileReader):
     processingDuration = time.time() - startTime
-    print(f"Archivo procesado en {processingDuration:.4f} segundos")
-    print(f"Resultados guardados en: {outputPath}")
+    print(f"Archivo procesado en: {processingDuration:.4f} segundos")
+    print(f"Resultdos guardados en: {outputPath}")
     
     if not fileProcessor.getErrorLog().isEmpty():
-        print("\nErrores encontrados durante el procesamiento:")
+        print("\nErrores encontrados durante procesamiento:")
         errorNode = fileProcessor.getErrorLog().headNode
         while errorNode:
             print(f"  - {errorNode.elementData}")

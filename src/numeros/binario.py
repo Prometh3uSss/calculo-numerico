@@ -1,6 +1,7 @@
 from numeros.numero import Number
 from utilidades.normalizador import normalizeBinaryNumber
 from errores.tiposErrores import InvalidNumberFormatError
+from core.tiposUtilidades import allElementsMeet
 
 class Binary(Number):
     def __init__(self, inputValue: str):
@@ -11,60 +12,49 @@ class Binary(Number):
         return 2
     
     def isValid(self, value: str) -> bool:
-        # Permitir signo opcional
         if value.startswith('-') or value.startswith('+'):
             value = value[1:]
         
-        # Dividir en parte entera y fraccionaria
         parts = value.split('.')
-        if len(parts) > 2:  # Máximo un punto decimal
+        if len(parts) > 2:
             return False
         
-        # Validación optimizada con terminación temprana
         for part in parts:
             if part:
-                for char in part:
-                    if char not in '01': 
-                        return False
+                if not allElementsMeet(part, lambda char: char in '01'):
+                    return False
         return True
     
-    def normalizeValue(self):  # Corregido: Nombre requerido por clase base
+    def normalizeValue(self):
         self.normalizedForm = normalizeBinaryNumber(self.originalValue)
     
     def countSignificantDigits(self):
         value = self.originalValue
         
-        # Manejar signo
         if value.startswith('-') or value.startswith('+'):
             value = value[1:]
         
-        # Caso especial: cero
-        if all(char in '0.' for char in value):
+        if allElementsMeet(value, lambda char: char in '0.,'):
             self.significantDigits = 1
             return
         
-        # Dividir en parte entera y fraccionaria
         parts = value.split('.')
         integerPart = parts[0].lstrip('0')
-        fractionalPart = parts[1] if len(parts) > 1 else ""
+        fractionalPart = parts[1].rstrip('0') if len(parts) > 1 else ""
         
-        # Combinar digitos significativos
         significantDigits = integerPart + fractionalPart
         significantDigits = significantDigits.lstrip('0')
         
-        if significantDigits == "":
-            self.significantDigits = 1  # Caso 0.000
+        if not significantDigits:
+            self.significantDigits = 1 
         else:
             self.significantDigits = len(significantDigits)
     
     def determineSupportedOperations(self):
-        """Binarios soportan +, -, *, / (excepto división por cero)"""
         self.supportedOperations = ['+', '-', '*']
         
-        # Permitir division solo si no es cero
-        # Verificar si el valor es cero: si después de quitar signo y puntos, solo hay ceros
         valueWithoutSign = self.originalValue.replace('-', '').replace('+', '')
-        if not all(char in '0.' for char in valueWithoutSign):
+        if not allElementsMeet(valueWithoutSign, lambda char: char in '0.,'):
             self.supportedOperations.append('/')
     
     def convertToFloat(self) -> float:
@@ -81,6 +71,24 @@ class Binary(Number):
                     fractionalValue += 2 ** (-position)
         
         return sign * (integerValue + fractionalValue)
-
+    
+    def getOriginalValue(self) -> str:
+        return self.originalValue
+    
+    def getNormalizedForm(self) -> str:
+        return self.normalizedForm
+    
     def getSignificantDigitsCount(self) -> int:
         return self.significantDigits
+    
+    def getSupportedOperations(self) -> list:
+        return self.supportedOperations
+    
+    def getBase(self) -> int:
+        return self.base
+    
+    def __str__(self) -> str:
+        return (f"Binary: {self.originalValue} | "
+                f"Normalizado: {self.normalizedForm} | "
+                f"Digitos Significativos: {self.significantDigits} | "
+                f"Operaciones: {''.join(self.supportedOperations)}")

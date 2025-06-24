@@ -1,6 +1,7 @@
 from numeros.numero import Number
 from utilidades.normalizador import normalizeDecimalNumber
 from errores.tiposErrores import InvalidNumberFormatError
+from core.tiposUtilidades import allElementsMeet
 
 class Decimal(Number):
     def __init__(self, inputValue: str):
@@ -11,39 +12,30 @@ class Decimal(Number):
         return 10
     
     def isValid(self, value: str) -> bool:
-        # Permitir signo opcional
         if value.startswith('-') or value.startswith('+'):
             value = value[1:]
         
-        # Casos especiales: notacion cientifica
         if 'e' in value.lower():
             parts = value.lower().split('e')
             if len(parts) != 2:
                 return False
-            if not self.isValidPart(parts[0]) or not self.isValidPart(parts[1]):
-                return False
-            return True
+            return self.isValidPart(parts[0]) and self.isValidPart(parts[1])
         
         return self.isValidPart(value)
     
     def isValidPart(self, part: str) -> bool:
-        # Caso especial: parte vacía
         if not part:
             return True
             
-        # Verificar si hay punto decimal
         if '.' in part:
             integer, fractional = part.split('.', 1)
-            # Validar parte entera
-            if integer and not integer.isdigit():
+            if integer and not allElementsMeet(integer, lambda char: char.isdigit()):
                 return False
-            # Validar parte fraccionaria
-            if fractional and not fractional.isdigit():
+            if fractional and not allElementsMeet(fractional, lambda char: char.isdigit()):
                 return False
             return True
         
-        # Parte sin punto decimal
-        return part.isdigit()
+        return allElementsMeet(part, lambda char: char.isdigit())
     
     def normalizeValue(self):
         self.normalizedForm = normalizeDecimalNumber(self.originalValue)
@@ -51,21 +43,17 @@ class Decimal(Number):
     def countSignificantDigits(self):
         value = self.originalValue
         
-        # Manejar signo
         if value.startswith('-') or value.startswith('+'):
             value = value[1:]
         
-        # Caso especial: cero
-        if value.replace('0', '').replace('.', '') == '':
+        if allElementsMeet(value, lambda char: char in '0.,'):
             self.significantDigits = 1
             return
         
-        # Manejar notacion cientifica
         if 'e' in value.lower():
             mantissa, _ = value.lower().split('e')
             value = mantissa
         
-        # Dividir en parte entera y fraccionaria
         parts = value.split('.')
         integerPart = parts[0].lstrip('0')
         
@@ -74,10 +62,9 @@ class Decimal(Number):
         else:
             fractionalPart = ""
         
-        # Combinar digitos significativos
         significantDigits = integerPart + fractionalPart
         
-        if significantDigits == "":
+        if not significantDigits:
             self.significantDigits = 1
         else:
             self.significantDigits = len(significantDigits)
@@ -88,5 +75,23 @@ class Decimal(Number):
     def convertToFloat(self) -> float:
         return float(self.originalValue.replace(',', '.'))
     
+    def getOriginalValue(self) -> str:
+        return self.originalValue
+    
+    def getNormalizedForm(self) -> str:
+        return self.normalizedForm
+    
     def getSignificantDigitsCount(self) -> int:
         return self.significantDigits
+    
+    def getSupportedOperations(self) -> list:
+        return self.supportedOperations
+    
+    def getBase(self) -> int:
+        return self.base
+    
+    def __str__(self) -> str:
+        return (f"Decimal: {self.originalValue} | "
+                f"Normalizado: {self.normalizedForm} | "
+                f"Digitos Significativos: {self.significantDigits} | "
+                f"Operaciones: {''.join(self.supportedOperations)}")
