@@ -6,14 +6,14 @@ from estructuras.listaEnlazada import LinkedList
 class FileGenerator:
     def __init__(self, outputDirectory: str):
         self.outputDirectory = outputDirectory
-        self.validateOutputDirectory()
+        self.testOutputDirectory = os.path.join(outputDirectory, 'test-results')
+        self.validateOutputDirectory(self.testOutputDirectory) 
     
-    def validateOutputDirectory(self):
-
-        if not os.path.exists(self.outputDirectory):
+    def validateOutputDirectory(self, directory: str):
+        if not os.path.exists(directory):
             try:
-                os.makedirs(self.outputDirectory)
-                print(f"Directorio creado: {self.outputDirectory}")
+                os.makedirs(directory)
+                print(f"Directorio creado: {directory}")
             except OSError as error:
                 raise OSError(f"Error creando directorio: {str(error)}")
     
@@ -22,7 +22,7 @@ class FileGenerator:
             raise ValueError("Datos insuficientes para generar archivo")
         
         fileName = self.generateFileName(baseName)
-        fullPath = os.path.join(self.outputDirectory, fileName)
+        fullPath = os.path.join(self.testOutputDirectory, fileName)
         
         try:
             self.writeResultsToFile(fullPath, resultsList)
