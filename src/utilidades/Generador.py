@@ -4,12 +4,11 @@ from datetime import datetime
 from estructuras.listaEnlazada import LinkedList
 
 class FileGenerator:
-    def _init_(self, outputDirectory: str):
+    def __init__(self, outputDirectory: str):
         self.outputDirectory = outputDirectory
         self.validateOutputDirectory()
     
     def validateOutputDirectory(self):
-
         if not os.path.exists(self.outputDirectory):
             try:
                 os.makedirs(self.outputDirectory)
@@ -34,7 +33,7 @@ class FileGenerator:
     def generateFileName(self, baseName: str) -> str:
         currentDate = datetime.now().strftime("%Y%m%d")
         serialNumber = random.randint(1, 999)
-        return f"{baseName}{currentDate}{serialNumber:03d}.txt"
+        return f"{baseName}_{currentDate}_{serialNumber:03d}.txt"
     
     def writeResultsToFile(self, filePath: str, resultsList: LinkedList):
         try:
@@ -45,5 +44,3 @@ class FileGenerator:
                     currentNode = currentNode.nextNode
         except IOError as ioError:
             raise IOError(f"Error escribiendo archivo: {str(ioError)}")
-
-#r

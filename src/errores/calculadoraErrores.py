@@ -11,7 +11,7 @@ class ErrorCalculator:
             if approximateValue == 0:
                 return 0.0
             return float('inf')
-        return abs(exactValue - approximateValue) / abs(exactValue)
+        return abs(exactValue - approximateValue) / abs(exactValue) #r
     
     @staticmethod
     def calculateRoundingError(significantDigits: int) -> float:
