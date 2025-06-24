@@ -48,13 +48,20 @@ def setupProcessingEnvironment(outputDirectory: str):
 def getProcessableFiles(directoryPath: str) -> LinkedList:
     fileList = LinkedList()
     
+    testSamplesPath = os.path.join(directoryPath, 'test-samples')
+    
     try:
-        for fileName in os.listdir(directoryPath):
+        if not os.path.exists(testSamplesPath):
+            print(f"Advertencia: no se encontro el directorio 'test-samples' en {testSamplesPath}")
+            return fileList
+        
+        for fileName in os.listdir(testSamplesPath):
             if fileName.endswith('.txt') or fileName.endswith('.bin'):
-                fullPath = os.path.join(directoryPath, fileName)
+                fullPath = os.path.join(testSamplesPath, fileName)
                 fileList.addElementAtEnd(fullPath)
+    
     except FileNotFoundError:
-        print(f"Advertencia: no se encontro la carpeta 'data' en {directoryPath}")
+        print(f"Advertencia: no se encontro la carpeta 'test-samples' en {testSamplesPath}")
     
     return fileList
 
