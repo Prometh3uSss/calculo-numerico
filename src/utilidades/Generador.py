@@ -45,3 +45,5 @@ class FileGenerator:
                     currentNode = currentNode.nextNode
         except IOError as ioError:
             raise IOError(f"Error escribiendo archivo: {str(ioError)}")
+
+#r

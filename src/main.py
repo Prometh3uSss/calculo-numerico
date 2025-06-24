@@ -19,7 +19,7 @@ import numeros
 def mainExecution():
     try:
         dataDirectoryPath = os.path.join(os.getcwd(), 'data')
-        outputDirectoryPath = os.path.join(os.getcwd(), 'output')
+        outputDirectoryPath = os.path.join(os.getcwd(), 'output') #r
         
         setupProcessingEnvironment(outputDirectoryPath)
         
@@ -29,7 +29,7 @@ def mainExecution():
         filesToProcess = getProcessableFiles(dataDirectoryPath)
         
         if filesToProcess.getListLength() == 0:
-            print("No se encontraron archivos válidos para procesar en la carpeta 'data'")
+            print("No se encontraron archivos validos para procesar en la carpeta data.")
             return
         
         processFileCollection(filesToProcess, fileProcessor, fileGenerator)
