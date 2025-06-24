@@ -57,7 +57,7 @@ class FormatValidator:
     @staticmethod
     def determineNumberSystem(inputValue: str) -> str:
         if FormatValidator.isValidBinary(inputValue):
-            return "Binary"
+            return "Binario"  
         elif FormatValidator.isValidDecimal(inputValue):
             return "Decimal"
         elif FormatValidator.isValidHexadecimal(inputValue):

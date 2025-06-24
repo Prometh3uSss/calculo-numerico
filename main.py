@@ -149,42 +149,70 @@ def getNumberTypeDescription(numberObject) -> str:
     return "Desconocido"
 
 def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList):
-    if processedData.getListLength() < 1:
+    if processedData.isEmpty() or processedData.getListLength() < 2:
         return
     
-    try:
-        firstRow = processedData.headNode.elementData
-        if firstRow.getListLength() < 2:
-            return
-            
-        firstNumber = firstRow.headNode.elementData
-        secondNumber = firstRow.headNode.nextNode.elementData
+    allValues = LinkedList()
+    currentRow = processedData.headNode
+    while currentRow:
+        row = currentRow.elementData
+        if not row.isEmpty():
+            currentCell = row.headNode
+            while currentCell:
+                try:
+                    allValues.addElementAtEnd(currentCell.elementData.convertToFloat())
+                except Exception as e:
+                    print(f"Error en conversion: {str(e)}")
+                currentCell = currentCell.nextNode
+        currentRow = currentRow.nextNode
+    
+    if allValues.getListLength() < 2:
+        return
+    
+    resultContainer.addElementAtEnd("\n=== Resultados del analisis de errores ===")
+    
+    errorsList = LinkedList()
+    current = allValues.headNode
+    
+    while current and current.nextNode:
+        exact = current.elementData
+        approx = current.nextNode.elementData
         
-        exactValue = firstNumber.convertToFloat()
-        approxValue = secondNumber.convertToFloat()
+        absError = ErrorCalculator.calculateAbsoluteError(exact, approx)
+        relError = ErrorCalculator.calculateRelativeError(exact, approx)
+        roundError = ErrorCalculator.calculateRoundingError(4)
+        truncError = ErrorCalculator.calculateTruncationError(4)
         
-        absoluteError = ErrorCalculator.calculateAbsoluteError(exactValue, approxValue)
-        relativeError = ErrorCalculator.calculateRelativeError(exactValue, approxValue)
+        errorValues = LinkedList()
+        errorValues.addElementAtEnd(absError)
+        errorValues.addElementAtEnd(relError)
+        sumPropError = ErrorCalculator.calculateSumErrorPropagation(errorValues)
         
-        roundingError = ErrorCalculator.calculateRoundingError(4)
-        truncationError = ErrorCalculator.calculateTruncationError(4)
+        valuesList = LinkedList()
+        valuesList.addElementAtEnd(exact)
+        valuesList.addElementAtEnd(approx)
         
-        propagationError = ErrorCalculator.calculateProductErrorPropagation(
-            [exactValue, approxValue],
-            [absoluteError, absoluteError]
+        absErrorsList = LinkedList()
+        absErrorsList.addElementAtEnd(absError)
+        absErrorsList.addElementAtEnd(absError)
+        
+        prodPropError = ErrorCalculator.calculateProductErrorPropagation(
+            valuesList, absErrorsList
         )
         
-        # Add results
-        resultContainer.addElementAtEnd("\n=== Resultados del analisis de ===")
-        resultContainer.addElementAtEnd(f"Comparacion: {firstNumber.getOriginalValue()} vs {secondNumber.getOriginalValue()}")
-        resultContainer.addElementAtEnd(f"Error Adsoluto: {absoluteError}")
-        resultContainer.addElementAtEnd(f"Error Relativo: {relativeError}")
-        resultContainer.addElementAtEnd(f"Error por Redondeo: {roundingError}")
-        resultContainer.addElementAtEnd(f"Error por truncamiento: {truncationError}")
-        resultContainer.addElementAtEnd(f"Error por propagacion: {propagationError}")
+        resultLine = (
+            f"Comparacion: {exact:.6f} vs {approx:.6f}\n"
+            f" - Error Absoluto: {absError:.6f}\n"
+            f" - Error Relativo: {relError:.6f}\n"
+            f" - Error Redondeo: {roundError:.6f}\n"
+            f" - Error Truncamiento: {truncError:.6f}\n"
+            f" - Propagacion (Suma): {sumPropError:.6f}\n"
+            f" - Propagacion (Producto): {prodPropError:.6f}"
+        )
+        resultContainer.addElementAtEnd(resultLine)
+        errorsList.addElementAtEnd(resultLine)
         
-    except Exception as generalError:
-        resultContainer.addElementAtEnd(f"Error en el calculo de errores: {str(generalError)}")
+        current = current.nextNode.nextNode if current.nextNode else None
 
 def displayProcessingStatistics(startTime: float, outputPath: str, fileProcessor: FileReader):
     processingDuration = time.time() - startTime

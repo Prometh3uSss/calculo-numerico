@@ -95,10 +95,29 @@ class LinkedList:
             yield currentNode.elementData
             currentNode = currentNode.nextNode
     
-    def __str__(self):
-        elements = []
-        currentNode = self.headNode
-        while currentNode:
-            elements.append(str(currentNode.elementData))
-            currentNode = currentNode.nextNode
-        return "[" + " -> ".join(elements) + "]" if elements else "Lista Vacia"
+def __str__(self):
+    if self.isEmpty():
+        return "[]"
+    
+    buffer = LinkedList()
+    current = self.headNode
+    while current:
+        buffer.addElementAtEnd(str(current.elementData))
+        current = current.nextNode
+    
+    return "[" + self.joinLinkedList(buffer, " -> ") + "]"
+
+@staticmethod
+def joinLinkedList(ll: LinkedList, separator: str) -> str:
+    if ll.isEmpty():
+        return ""
+    
+    current = ll.headNode
+    result = current.elementData
+    current = current.nextNode
+    
+    while current:
+        result += separator + current.elementData
+        current = current.nextNode
+    
+    return result

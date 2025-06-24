@@ -82,30 +82,16 @@ class FileReader:
         return linesQueue
     
     def readTextFileLines(self, filePath: str) -> LinkedList:
-        linesQueue = LinkedList()
-        
+        lines = LinkedList()
         try:
             with open(filePath, 'r', encoding='utf-8') as file:
-                currentLine = ""
-                while True:
-                    char = file.read(1)
-                    if not char:
-                        break
-                    if char == '\n':
-                        linesQueue.addElementAtEnd(currentLine.strip())
-                        currentLine = ""
-                    else:
-                        currentLine += char
-                
-                if currentLine:
-                    linesQueue.addElementAtEnd(currentLine.strip())
-                    
-        except FileNotFoundError:
-            raise FileNotFoundException(f"Archivo no encontrado: {filePath}")
-        except IOError as ioError:
-            raise IOException(f"Error de lectura: {str(ioError)}")
-            
-        return linesQueue
+                for line in file:
+                    cleaned = line.strip().replace('\0', '')
+                    if cleaned:
+                        lines.addElementAtEnd(cleaned)
+        except Exception as e:
+            raise IOError(f"Error de lectura: {str(e)}")
+        return lines
     
     def extractFileNameFromPath(self, path: str) -> str:
         pathParts = LinkedList()

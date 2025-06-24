@@ -1,7 +1,12 @@
 from numeros.numero import Number
-from utilidades.normalizador import normalizeDecimalNumber
-from errores.tiposErrores import InvalidNumberFormatError
-from core.tiposUtilidades import allElementsMeet
+from core.tiposUtilidades import allElementsMeet  
+from ..utilidades.normalizador import normalizeDecimalNumber  
+from utilidades.validadores import validateBasicOperation
+from errores.tiposErrores import (
+    DivisionByZeroError,
+    MathematicalIndeterminacyError,
+    InvalidNumericOperationError
+)
 
 class Decimal(Number):
     def __init__(self, inputValue: str):
@@ -90,6 +95,31 @@ class Decimal(Number):
     def getBase(self) -> int:
         return self.base
     
+    def operate(self, operation: str, other) -> 'Decimal':
+        self_val = self.convertToFloat()
+        other_val = other.convertToFloat()
+        
+        try:
+            validateBasicOperation(operation, self_val, other_val)
+            
+            # Reemplazo de match con if-elif
+            if operation == '+':
+                result = self_val + other_val
+            elif operation == '-':
+                result = self_val - other_val
+            elif operation == '*':
+                result = self_val * other_val
+            elif operation == '/':
+                result = self_val / other_val
+            else:
+                raise InvalidNumericOperationError(f"Operacion no soportada: {operation}")
+            
+            return Decimal(str(result))
+        
+        except (DivisionByZeroError, MathematicalIndeterminacyError) as e:
+            print(f"Error en operacion {operation}: {str(e)}")
+            return None
+
     def __str__(self) -> str:
         return (f"Decimal: {self.originalValue} | "
                 f"Normalizado: {self.normalizedForm} | "

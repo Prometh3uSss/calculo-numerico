@@ -1,7 +1,12 @@
 from numeros.numero import Number
-from utilidades.normalizador import normalizeBinaryNumber
-from errores.tiposErrores import InvalidNumberFormatError
 from core.tiposUtilidades import allElementsMeet
+from ..utilidades.normalizador import normalizeBinaryNumber  
+from utilidades.validadores import validateBasicOperation
+from errores.tiposErrores import (
+    DivisionByZeroError,
+    MathematicalIndeterminacyError,
+    InvalidNumericOperationError
+)
 
 class Binary(Number):
     def __init__(self, inputValue: str):
@@ -86,6 +91,32 @@ class Binary(Number):
     
     def getBase(self) -> int:
         return self.base
+    
+    def operate(self, operation: str, other) -> 'Binary':
+        self_val = self.convertToFloat()
+        other_val = other.convertToFloat()
+        
+        try:
+            # Validación antes de operar
+            validateBasicOperation(operation, self_val, other_val)
+
+            # Reemplazo de match con if-elif
+            if operation == '+':
+                result = self_val + other_val
+            elif operation == '-':
+                result = self_val - other_val
+            elif operation == '*':
+                result = self_val * other_val
+            elif operation == '/':
+                result = self_val / other_val
+            else:
+                raise InvalidNumericOperationError(f"Operacion no soportada: {operation}")
+            
+            return Binary(str(result))
+        
+        except (DivisionByZeroError, MathematicalIndeterminacyError) as e:
+            print(f"Error en operacion {operation}: {str(e)}")
+            return None
     
     def __str__(self) -> str:
         return (f"Binary: {self.originalValue} | "

@@ -1,3 +1,5 @@
+from estructuras.listaEnlazada import LinkedList
+
 class ErrorCalculator:
     @staticmethod
     def calculateAbsoluteError(exactValue: float, approximateValue: float) -> float:
@@ -20,20 +22,43 @@ class ErrorCalculator:
         return 10 ** (-significantDigits)
     
     @staticmethod
-    def calculateSumErrorPropagation(*errorValues: float) -> float:
-        return sum(errorValues)
+    def calculateSumErrorPropagation(errorValues: LinkedList) -> float:
+        """Calcula la propagación de error para sumas/restas"""
+        total = 0.0
+        current = errorValues.headNode
+        while current:
+            total += current.elementData
+            current = current.nextNode
+        return total
     
     @staticmethod
-    def calculateProductErrorPropagation(values: list[float], absoluteErrors: list[float]) -> float:
+    def calculateProductErrorPropagation(values: LinkedList, absoluteErrors: LinkedList) -> float:
         relativeErrorSquaredSum = 0.0
-        for i in range(len(values)):
-            if values[i] == 0:
-                raise ZeroDivisionError("No se puede calcular error relativo para valor cero")
-            relativeError = absoluteErrors[i] / abs(values[i])
-            relativeErrorSquaredSum += relativeError ** 2
+        current_val = values.headNode
+        current_err = absoluteErrors.headNode
         
+        if values.getListLength() != absoluteErrors.getListLength():
+            raise ValueError("Las listas de valores y errores deben tener la misma longitud")
+        
+        while current_val and current_err:
+            value = current_val.elementData
+            abs_error = current_err.elementData
+            
+            if value == 0:
+                raise ZeroDivisionError("No se puede calcular error relativo para valor cero")
+                
+            relativeError = abs_error / abs(value)
+            relativeErrorSquaredSum += relativeError ** 2
+            
+            current_val = current_val.nextNode
+            current_err = current_err.nextNode
+        
+        # Calcular magnitud del producto
         productMagnitude = 1.0
-        for value in values:
-            productMagnitude *= abs(value)
+        current = values.headNode
+        while current:
+            productMagnitude *= abs(current.elementData)
+            current = current.nextNode
         
         return productMagnitude * (relativeErrorSquaredSum ** 0.5)
+

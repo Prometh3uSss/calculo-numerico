@@ -59,3 +59,21 @@ def validateMatrixDimensionsForOperation(matrixA, matrixB, operationType: str):
                 f"Dimensiones incompatibles para producto: "
                 f"{matrixA.rows}x{matrixA.columns} vs {matrixB.rows}x{matrixB.columns}"
             )
+        
+def validateBasicOperation(operation: str, *operands):
+    if operation == '/':
+        if len(operands) < 2:
+            raise ValueError("La divisipn requiere dos operandos")
+        validateDivisionDenominator(operands[1])
+    
+    elif operation == '√':
+        if len(operands) < 1:
+            raise ValueError("La raiz cuadrada requiere un operando")
+        if operands[0] < 0:
+            raise MathematicalIndeterminacyError("Raiz cuadrada de numero negativo")
+    
+    elif operation == 'log':
+        if len(operands) < 2:
+            raise ValueError("El logaritmo requiere dos operandos")
+        if operands[0] <= 0 or operands[1] <= 0:
+            raise MathematicalIndeterminacyError("Logaritmo de base o argumento no positivo")
