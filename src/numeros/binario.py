@@ -1,6 +1,6 @@
 from numeros.numero import Number
 from core.tiposUtilidades import allElementsMeet
-from ..utilidades.normalizador import normalizeBinaryNumber  
+from utilidades.normalizador import normalizeBinaryNumber  
 from utilidades.validadores import validateBasicOperation
 from errores.tiposErrores import (
     DivisionByZeroError,

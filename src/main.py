@@ -160,9 +160,10 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
             currentCell = row.headNode
             while currentCell:
                 try:
-                    allValues.addElementAtEnd(currentCell.elementData.convertToFloat())
+                    float_val = currentCell.elementData.convertToFloat()
+                    allValues.addElementAtEnd(float_val)
                 except Exception as e:
-                    print(f"Error en conversion: {str(e)}")
+                    print(f"Advertencia: valor no convertible a float - {str(e)}")
                 currentCell = currentCell.nextNode
         currentRow = currentRow.nextNode
     
@@ -171,46 +172,64 @@ def calculateErrorMetrics(processedData: LinkedList, resultContainer: LinkedList
     
     resultContainer.addElementAtEnd("\n=== Resultados del analisis de errores ===")
     
-    errorsList = LinkedList()
     current = allValues.headNode
     
     while current and current.nextNode:
         exact = current.elementData
         approx = current.nextNode.elementData
         
-        absError = ErrorCalculator.calculateAbsoluteError(exact, approx)
-        relError = ErrorCalculator.calculateRelativeError(exact, approx)
-        roundError = ErrorCalculator.calculateRoundingError(4)
-        truncError = ErrorCalculator.calculateTruncationError(4)
+        if exact == 0 and approx == 0:
+            resultLine = (
+                f"Comparacion: {exact:.6f} vs {approx:.6f}\n"
+                f" - Ambos valores son cero: calculos omitidos"
+            )
+            resultContainer.addElementAtEnd(resultLine)
+            current = current.nextNode.nextNode if current.nextNode else None
+            continue
         
-        errorValues = LinkedList()
-        errorValues.addElementAtEnd(absError)
-        errorValues.addElementAtEnd(relError)
-        sumPropError = ErrorCalculator.calculateSumErrorPropagation(errorValues)
-        
-        valuesList = LinkedList()
-        valuesList.addElementAtEnd(exact)
-        valuesList.addElementAtEnd(approx)
-        
-        absErrorsList = LinkedList()
-        absErrorsList.addElementAtEnd(absError)
-        absErrorsList.addElementAtEnd(absError)
-        
-        prodPropError = ErrorCalculator.calculateProductErrorPropagation(
-            valuesList, absErrorsList
-        )
-        
-        resultLine = (
-            f"Comparacion: {exact:.6f} vs {approx:.6f}\n"
-            f" - Error Absoluto: {absError:.6f}\n"
-            f" - Error Relativo: {relError:.6f}\n"
-            f" - Error Redondeo: {roundError:.6f}\n"
-            f" - Error Truncamiento: {truncError:.6f}\n"
-            f" - Propagacion (Suma): {sumPropError:.6f}\n"
-            f" - Propagacion (Producto): {prodPropError:.6f}"
-        )
-        resultContainer.addElementAtEnd(resultLine)
-        errorsList.addElementAtEnd(resultLine)
+        try:
+            absError = ErrorCalculator.calculateAbsoluteError(exact, approx)
+            relError = ErrorCalculator.calculateRelativeError(exact, approx)
+            roundError = ErrorCalculator.calculateRoundingError(4)
+            truncError = ErrorCalculator.calculateTruncationError(4)
+            
+            errorValues = LinkedList()
+            errorValues.addElementAtEnd(absError)
+            errorValues.addElementAtEnd(relError)
+            sumPropError = ErrorCalculator.calculateSumErrorPropagation(errorValues)
+            
+            valuesList = LinkedList()
+            valuesList.addElementAtEnd(exact)
+            valuesList.addElementAtEnd(approx)
+            
+            absErrorsList = LinkedList()
+            absErrorsList.addElementAtEnd(absError)
+            absErrorsList.addElementAtEnd(absError)
+            
+            prodPropError = ErrorCalculator.calculateProductErrorPropagation(
+                valuesList, absErrorsList
+            )
+            
+            relError_str = f"{relError:.6f}" if relError != float('inf') else "inf"
+            prodPropError_str = f"{prodPropError:.6f}" if prodPropError != float('inf') else "inf"
+            
+            resultLine = (
+                f"Comparacion: {exact:.6f} vs {approx:.6f}\n"
+                f" - Error Absoluto: {absError:.6f}\n"
+                f" - Error Relativo: {relError_str}\n"
+                f" - Error Redondeo: {roundError:.6f}\n"
+                f" - Error Truncamiento: {truncError:.6f}\n"
+                f" - Propagacion (Suma): {sumPropError:.6f}\n"
+                f" - Propagacion (Producto): {prodPropError_str}"
+            )
+            resultContainer.addElementAtEnd(resultLine)
+            
+        except Exception as e:
+            errorMsg = (
+                f"Error en cálculo para valores {exact:.6f} y {approx:.6f}: "
+                f"{str(e)}"
+            )
+            resultContainer.addElementAtEnd(errorMsg)
         
         current = current.nextNode.nextNode if current.nextNode else None
 

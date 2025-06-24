@@ -1,6 +1,6 @@
 from numeros.numero import Number
 from core.tiposUtilidades import allElementsMeet  
-from ..utilidades.normalizador import normalizeDecimalNumber  
+from utilidades.normalizador import normalizeDecimalNumber  
 from utilidades.validadores import validateBasicOperation
 from errores.tiposErrores import (
     DivisionByZeroError,

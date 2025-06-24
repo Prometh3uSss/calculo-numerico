@@ -23,7 +23,6 @@ class ErrorCalculator:
     
     @staticmethod
     def calculateSumErrorPropagation(errorValues: LinkedList) -> float:
-        """Calcula la propagación de error para sumas/restas"""
         total = 0.0
         current = errorValues.headNode
         while current:
@@ -45,20 +44,26 @@ class ErrorCalculator:
             abs_error = current_err.elementData
             
             if value == 0:
-                raise ZeroDivisionError("No se puede calcular error relativo para valor cero")
-                
-            relativeError = abs_error / abs(value)
+                if abs_error != 0:
+                    relativeError = float('inf')
+                else:
+                    relativeError = 0.0
+            else:
+                relativeError = abs_error / abs(value)
+            
             relativeErrorSquaredSum += relativeError ** 2
             
             current_val = current_val.nextNode
             current_err = current_err.nextNode
         
-        
         productMagnitude = 1.0
         current = values.headNode
         while current:
-            productMagnitude *= abs(current.elementData)
+            if current.elementData != 0:
+                productMagnitude *= abs(current.elementData)
             current = current.nextNode
         
+        if relativeErrorSquaredSum == float('inf'):
+            return float('inf')
+        
         return productMagnitude * (relativeErrorSquaredSum ** 0.5)
-
