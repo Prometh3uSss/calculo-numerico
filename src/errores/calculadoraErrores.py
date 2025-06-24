@@ -53,7 +53,7 @@ class ErrorCalculator:
             current_val = current_val.nextNode
             current_err = current_err.nextNode
         
-        # Calcular magnitud del producto
+        
         productMagnitude = 1.0
         current = values.headNode
         while current:

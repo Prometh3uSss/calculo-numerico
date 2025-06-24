@@ -5,7 +5,7 @@ class Stack:
         self.stackData = LinkedList()
     
     def addElementToStack(self, elementData):
-        # Crear nuevo nodo y actualizar referencias
+        
         newNode = LinkedList.Node(elementData)
         newNode.next = self.stackData.headNode
         self.stackData.headNode = newNode

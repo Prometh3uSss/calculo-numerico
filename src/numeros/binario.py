@@ -97,10 +97,10 @@ class Binary(Number):
         other_val = other.convertToFloat()
         
         try:
-            # Validación antes de operar
+            
             validateBasicOperation(operation, self_val, other_val)
 
-            # Reemplazo de match con if-elif
+            
             if operation == '+':
                 result = self_val + other_val
             elif operation == '-':

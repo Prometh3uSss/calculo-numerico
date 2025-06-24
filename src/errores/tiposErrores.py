@@ -10,7 +10,7 @@ class FileOperationException(ProjectBaseException):
     """Clase base para errores relacionados con operaciones de archivos"""
     pass
 
-# ===== Numeric Errors =====
+
 class DivisionByZeroError(NumericCalculationException):
     """Se intento realizar una división donde el denominador es cero"""
     pass
@@ -39,7 +39,7 @@ class InvalidNumericOperationError(NumericCalculationException):
     """Operacion numerica no valida para el tipo de dato o sistema numerico"""
     pass
 
-# ===== File Errors =====
+
 class FileProcessingException(FileOperationException):
     """Excepción general para errores durante el procesamiento de archivos"""
     pass
@@ -68,7 +68,7 @@ class IOException(FileOperationException):
     """Error durante operaciones de entrada/salida (lectura/escritura)"""
     pass
 
-# ===== Structural Errors =====
+
 class EmptyStructureException(ProjectBaseException):
     """Operación invalida sobre una estructura de datos vacia"""
     pass

@@ -16,7 +16,7 @@ def validateNumberFormat(inputValue: str, numberSystem: str):
     
     elif numberSystem == 'Decimal':
         try:
-            # Convertir considerando comas como puntos decimales
+            
             float(inputValue.replace(',', '.'))
         except ValueError:
             raise InvalidNumberFormatError(f"Valor '{inputValue}' no es decimal valido")
@@ -42,7 +42,7 @@ def validateMathematicalOperation(operationSymbol: str, operandValues: list):
             raise MathematicalIndeterminacyError("Operación invalida: logaritmo natural de numero no positivo")
 
 def validateMatrixDimensionsForOperation(matrixA, matrixB, operationType: str):
-    # Validar matrices no vacias
+    
     if matrixA.rows == 0 or matrixA.columns == 0 or matrixB.rows == 0 or matrixB.columns == 0:
         raise MatrixDimensionsError("Operacion invalida: matrices vacias")
     

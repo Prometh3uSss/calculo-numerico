@@ -20,14 +20,14 @@ class FileReader:
     def processInputFile(self, filePath: str) -> LinkedList:
         fileName = self.extractFileNameFromPath(filePath)
         
-        # Validar formato del nombre usando FormatValidator
+        
         if not FormatValidator.validateFileName(fileName):
             raise FileNameFormatError(f"Formato inválido: {fileName}")
         
-        # Determinar tipo de archivo
+        
         isBinaryFile = self.isValidBinaryFile(filePath)
         
-        # Leer líneas según tipo de archivo
+        
         if isBinaryFile:
             rawLines = self.readBinaryFile(filePath)
         else:
@@ -40,9 +40,9 @@ class FileReader:
     def isValidBinaryFile(self, filePath: str) -> bool:
         try:
             with open(filePath, 'rb') as file:
-                # Leer primeros 1024 bytes para análisis
+                
                 chunk = file.read(1024)
-                # Archivo es binario si contiene bytes no decodificables
+                
                 try:
                     chunk.decode('utf-8')
                     return False
@@ -190,7 +190,7 @@ class FileReader:
     def createNumberObject(self, rawValue: str):
         normalizedValue = rawValue.replace(',', '.').lower()
         
-        # Usar FormatValidator para determinar el sistema numérico
+        
         numberSystem = FormatValidator.determineNumberSystem(normalizedValue)
         
         if numberSystem == "Binario":

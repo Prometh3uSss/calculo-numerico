@@ -102,7 +102,7 @@ class Decimal(Number):
         try:
             validateBasicOperation(operation, self_val, other_val)
             
-            # Reemplazo de match con if-elif
+            
             if operation == '+':
                 result = self_val + other_val
             elif operation == '-':
