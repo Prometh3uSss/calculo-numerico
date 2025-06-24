@@ -4,16 +4,16 @@ from datetime import datetime
 from estructuras.listaEnlazada import LinkedList
 
 class FileGenerator:
-    def __init__(self, outputDirectory: str):
+    def _init_(self, outputDirectory: str):
         self.outputDirectory = outputDirectory
-        self.testOutputDirectory = os.path.join(outputDirectory, 'test-results')
-        self.validateOutputDirectory(self.testOutputDirectory) 
+        self.validateOutputDirectory()
     
-    def validateOutputDirectory(self, directory: str):
-        if not os.path.exists(directory):
+    def validateOutputDirectory(self):
+
+        if not os.path.exists(self.outputDirectory):
             try:
-                os.makedirs(directory)
-                print(f"Directorio creado: {directory}")
+                os.makedirs(self.outputDirectory)
+                print(f"Directorio creado: {self.outputDirectory}")
             except OSError as error:
                 raise OSError(f"Error creando directorio: {str(error)}")
     
@@ -22,7 +22,7 @@ class FileGenerator:
             raise ValueError("Datos insuficientes para generar archivo")
         
         fileName = self.generateFileName(baseName)
-        fullPath = os.path.join(self.testOutputDirectory, fileName)
+        fullPath = os.path.join(self.outputDirectory, fileName)
         
         try:
             self.writeResultsToFile(fullPath, resultsList)
@@ -34,7 +34,7 @@ class FileGenerator:
     def generateFileName(self, baseName: str) -> str:
         currentDate = datetime.now().strftime("%Y%m%d")
         serialNumber = random.randint(1, 999)
-        return f"{baseName}_{currentDate}_{serialNumber:03d}.txt"
+        return f"{baseName}{currentDate}{serialNumber:03d}.txt"
     
     def writeResultsToFile(self, filePath: str, resultsList: LinkedList):
         try:

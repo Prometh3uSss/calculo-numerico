@@ -48,20 +48,13 @@ def setupProcessingEnvironment(outputDirectory: str):
 def getProcessableFiles(directoryPath: str) -> LinkedList:
     fileList = LinkedList()
     
-    testSamplesPath = os.path.join(directoryPath, 'test-samples')
-    
     try:
-        if not os.path.exists(testSamplesPath):
-            print(f"Advertencia: no se encontro el directorio 'test-samples' en {testSamplesPath}")
-            return fileList
-        
-        for fileName in os.listdir(testSamplesPath):
+        for fileName in os.listdir(directoryPath):
             if fileName.endswith('.txt') or fileName.endswith('.bin'):
-                fullPath = os.path.join(testSamplesPath, fileName)
+                fullPath = os.path.join(directoryPath, fileName)
                 fileList.addElementAtEnd(fullPath)
-    
     except FileNotFoundError:
-        print(f"Advertencia: no se encontro la carpeta 'test-samples' en {testSamplesPath}")
+        print(f"Advertencia: no se encontro la carpeta 'data' en {directoryPath}")
     
     return fileList
 
@@ -252,5 +245,5 @@ def displayProcessingStatistics(startTime: float, outputPath: str, fileProcessor
             print(f"  - {errorNode.elementData}")
             errorNode = errorNode.nextNode
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     mainExecution()
