@@ -35,6 +35,10 @@ class MatrixDimensionsError(NumericCalculationException):
     """Las dimensiones de las matrices son incompatibles para la operación solicitada"""
     pass
 
+class SingularMatrixError(Exception):
+    """Excepción lanzada cuando se intenta operar con una matriz singular."""
+    pass
+
 class InvalidNumericOperationError(NumericCalculationException):
     """Operacion numerica no valida para el tipo de dato o sistema numerico"""
     pass

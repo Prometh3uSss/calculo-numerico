@@ -33,7 +33,7 @@ def mainExecution():
         filesToProcess = getProcessableFiles(dataDirectoryPath)
         
         if filesToProcess.getListLength() == 0:
-            print("No se encontraron archivos válidos para procesar en la carpeta 'data'")
+            print("No se encontraron archivos validos para procesar en la carpeta 'data'")
             return
         
         processFileCollection(filesToProcess, fileProcessor, fileGenerator)

@@ -1,4 +1,4 @@
-from matrix import Matrix
+from algebra.matrix import Matrix
 from errores.tiposErrores import MatrixDimensionsError, SingularMatrixError
 from estructuras.listaEnlazada import LinkedList
 import math
