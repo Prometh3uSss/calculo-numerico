@@ -1,0 +1,101 @@
+Fila 1, Col 1: Valor: 2 | Sistema: Decimal | Normalizado: 2 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 1, Col 2: Valor: 1 | Sistema: Binario | Normalizado: 1 × 2^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 1, Col 3: Valor: -1 | Sistema: Decimal | Normalizado: -1 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 1, Col 4: Valor: 8 | Sistema: Decimal | Normalizado: 8 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 2, Col 1: Valor: -3 | Sistema: Decimal | Normalizado: -3 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 2, Col 2: Valor: -1 | Sistema: Decimal | Normalizado: -1 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 2, Col 3: Valor: 2 | Sistema: Decimal | Normalizado: 2 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 2, Col 4: Valor: -11 | Sistema: Decimal | Normalizado: -1.1 × 10^1 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 3, Col 1: Valor: -2 | Sistema: Decimal | Normalizado: -2 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 3, Col 2: Valor: 1 | Sistema: Binario | Normalizado: 1 × 2^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 3, Col 3: Valor: 2 | Sistema: Decimal | Normalizado: 2 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 3, Col 4: Valor: -3 | Sistema: Decimal | Normalizado: -3 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 4, Col 1: Valor: 1.5 | Sistema: Decimal | Normalizado: 1.5 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 4, Col 2: Valor: 2.3 | Sistema: Decimal | Normalizado: 2.3 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 4, Col 3: Valor: 3.1 | Sistema: Decimal | Normalizado: 3.1 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 5, Col 1: Valor: 4.2 | Sistema: Decimal | Normalizado: 4.2 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 5, Col 2: Valor: 5.4 | Sistema: Decimal | Normalizado: 5.4 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 5, Col 3: Valor: 6.0 | Sistema: Decimal | Normalizado: 6 × 10^0 | Digitos significativos: 1 | Operaciones: +,-,*,/
+Fila 6, Col 1: Valor: 7.1 | Sistema: Decimal | Normalizado: 7.1 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 6, Col 2: Valor: 8.2 | Sistema: Decimal | Normalizado: 8.2 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+Fila 6, Col 3: Valor: 9.3 | Sistema: Decimal | Normalizado: 9.3 × 10^0 | Digitos significativos: 2 | Operaciones: +,-,*,/
+
+=== Resultados del analisis de errores ===
+Comparacion: 2.000000 vs 1.000000
+ - Error Absoluto: 1.000000
+ - Error Relativo: 0.500000
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 1.500000
+ - Propagacion (Producto): 2.236068
+Comparacion: -1.000000 vs 8.000000
+ - Error Absoluto: 9.000000
+ - Error Relativo: 9.000000
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 18.000000
+ - Propagacion (Producto): 72.560320
+Comparacion: -3.000000 vs -1.000000
+ - Error Absoluto: 2.000000
+ - Error Relativo: 0.666667
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 2.666667
+ - Propagacion (Producto): 6.324555
+Comparacion: 2.000000 vs -11.000000
+ - Error Absoluto: 13.000000
+ - Error Relativo: 6.500000
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 19.500000
+ - Propagacion (Producto): 145.344419
+Comparacion: -2.000000 vs 1.000000
+ - Error Absoluto: 3.000000
+ - Error Relativo: 1.500000
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 4.500000
+ - Propagacion (Producto): 6.708204
+Comparacion: 2.000000 vs -3.000000
+ - Error Absoluto: 5.000000
+ - Error Relativo: 2.500000
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 7.500000
+ - Propagacion (Producto): 18.027756
+Comparacion: 1.500000 vs 2.300000
+ - Error Absoluto: 0.800000
+ - Error Relativo: 0.533333
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 1.333333
+ - Propagacion (Producto): 2.196725
+Comparacion: 3.100000 vs 4.200000
+ - Error Absoluto: 1.100000
+ - Error Relativo: 0.354839
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 1.454839
+ - Propagacion (Producto): 5.742169
+Comparacion: 5.400000 vs 6.000000
+ - Error Absoluto: 0.600000
+ - Error Relativo: 0.111111
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 0.711111
+ - Propagacion (Producto): 4.843305
+Comparacion: 7.100000 vs 8.200000
+ - Error Absoluto: 1.100000
+ - Error Relativo: 0.154930
+ - Error Redondeo: 0.000050
+ - Error Truncamiento: 0.000100
+ - Propagacion (Suma): 1.254930
+ - Propagacion (Producto): 11.931324
+
+=== Operaciones Matriciales ===
+
+Operaciones elementales de matrices:
+Error en transpuesta: 'Matrix' object has no attribute 'transpose'
+Error en escalado: 'Matrix' object has no attribute 'scalar_multiply'
+
+El archivo no contiene un sistema de ecuaciones valido
