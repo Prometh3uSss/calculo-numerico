@@ -95,6 +95,22 @@ class LinkedList:
             yield currentNode.elementData
             currentNode = currentNode.nextNode
     
+    def setElementAtIndex(self, index: int, value):
+        if index < 0 or index >= self.listLength:
+            raise IndexError("Índice fuera de rango")
+        current = self.headNode
+        for _ in range(index):
+            current = current.nextNode
+        current.elementData = value
+
+    def toPythonList(self):
+        result = []
+        current = self.headNode
+        while current:
+            result.append(current.elementData)
+            current = current.nextNode
+        return result
+    
 def __str__(self):
     if self.isEmpty():
         return "[]"

@@ -1,4 +1,5 @@
 from estructuras.listaEnlazada import LinkedList
+from algebra.matrix import Matrix
 from numeros.binario import Binary
 from numeros.decimal import Decimal
 from numeros.hexadecimal import Hexadecimal
@@ -211,3 +212,33 @@ class FileReader:
     
     def getErrorLog(self) -> LinkedList:
         return self.errorLog
+
+    def processAsMatrix(self) -> Matrix:
+        if self.processedData.isEmpty():
+            return Matrix(0, 0)
+        
+        rows = self.totalRows
+        cols = self.totalColumns
+        
+        decimal_data = LinkedList()
+        current_row = self.processedData.headNode
+        
+        while current_row:
+            row_data = current_row.elementData
+            decimal_row = LinkedList()
+            current_cell = row_data.headNode
+            
+            while current_cell:
+                num_obj = current_cell.elementData
+                try:
+                    decimal_value = num_obj.convertToFloat()
+                    decimal_row.addElementAtEnd(decimal_value)
+                except Exception as e:
+                    self.logError(0, str(num_obj), f"Error conversion decimal: {str(e)}")
+                    decimal_row.addElementAtEnd(0.0)
+                current_cell = current_cell.nextNode
+            
+            decimal_data.addElementAtEnd(decimal_row)
+            current_row = current_row.nextNode
+        
+        return Matrix(rows, cols, decimal_data)
